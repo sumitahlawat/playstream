@@ -1,0 +1,12 @@
+prefix=
+exec_prefix=
+libdir=${pcfiledir}
+includedir=/home/sumit/workspace/playstream/jni/rockffmpeg
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 52.117.0
+Requires: 
+Conflicts:
+Libs: ${libdir}/libavcodec.a -lm -lz -lgcc 
+Cflags: -I${includedir}

@@ -1,0 +1,12 @@
+prefix=
+exec_prefix=
+libdir=${pcfiledir}
+includedir=/home/sumit/workspace/playstream/jni/rockffmpeg
+
+Name: libavformat
+Description: FFmpeg container format library
+Version: 52.106.0
+Requires: libavcodec = 52.117.0
+Conflicts:
+Libs: ${libdir}/libavformat.a -lm -lz -lgcc 
+Cflags: -I${includedir}

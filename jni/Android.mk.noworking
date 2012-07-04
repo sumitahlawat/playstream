@@ -1,0 +1,54 @@
+LOCAL_PATH := $(call my-dir)
+
+#declare the prebuilt library
+include $(CLEAR_VARS)
+LOCAL_MODULE := ffmpeg-prebuilt
+LOCAL_SRC_FILES := rockffmpeg/android/armv7-a/libffmpeg.so
+LOCAL_EXPORT_C_INCLUDES := rockffmpeg/android/armv7-a/include
+LOCAL_EXPORT_LDLIBS := rockffmpeg/android/armv7-a/libffmpeg.so
+LOCAL_PRELINK_MODULE := true
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libUsageEnvironment
+LOCAL_SRC_FILES := live/UsageEnvironment/libUsageEnvironment.a
+LOCAL_EXPORT_C_INCLUDES := live/UsageEnvironment/include/
+LOCAL_PRELINK_MODULE := true
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libgroupsock
+LOCAL_SRC_FILES := live/groupsock/libgroupsock.a
+LOCAL_EXPORT_C_INCLUDES := live/groupsock/include/
+LOCAL_PRELINK_MODULE := true
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libBasicUsageEnvironment
+LOCAL_SRC_FILES := live/BasicUsageEnvironment/libBasicUsageEnvironment.a
+LOCAL_EXPORT_C_INCLUDES := live/BasicUsageEnvironment/include/
+LOCAL_PRELINK_MODULE := true
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libliveMedia
+LOCAL_SRC_FILES := live/liveMedia/libliveMedia.a
+LOCAL_EXPORT_C_INCLUDES := live/liveMedia/include/
+LOCAL_PRELINK_MODULE := true
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE:= rtsprec
+LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/live/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/live/BasicUsageEnvironment/include $(LOCAL_PATH)/liveMedia/include $(LOCAL_PATH)/player/include $(LOCAL_PATH)/player/jni-include
+
+LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1  
+LOCAL_SRC_FILES	:= live/testProgs/testRTSPClient.cpp
+
+LOCAL_LDLIBS := -llog -ldl -ljnigraphics -lz -lm $(LOCAL_PATH)/rockffmpeg/android/armv7-a/libffmpeg.so $(LOCAL_PATH)/live/BasicUsageEnvironment/libBasicUsageEnvironment.a $(LOCAL_PATH)/live/groupsock/libgroupsock.a $(LOCAL_PATH)/live/liveMedia/libliveMedia.a $(LOCAL_PATH)/live/BasicUsageEnvironment/libBasicUsageEnvironment.a
+
+LOCAL_SHARED_LIBRARY := ffmpeg-prebuilt
+LOCAL_STATIC_LIBRARIES := libUsageEnvironment libgroupsock  libBasicUsageEnvironment libliveMedia
+
+include $(BUILD_EXECUTABLE)
+#include $(BUILD_SHARED_LIBRARY)
+$(call import-module,cxx-stl/stlport,cxx-stl/gnu-libstdc++)
