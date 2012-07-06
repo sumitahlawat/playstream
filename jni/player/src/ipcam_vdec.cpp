@@ -14,16 +14,13 @@
 
 #include "ipcam_vdec.h"
 
-#include <utils/threads.h>
+#include <pthread.h>
 
 #ifdef PGM_SAVE
 #undef PGM_SAVE
 #endif
 
 extern void DisplayCb_1 (uint8_t* aData[], int aDataLen);
-extern void DisplayCb_2 (uint8_t* aData[], int aDataLen);
-extern void DisplayCb_3 (uint8_t* aData[], int aDataLen);
-extern void DisplayCb_4 (uint8_t* aData[], int aDataLen);
 
 ipcam_vdec :: ipcam_vdec(int camID, int width, int height)
 {
@@ -38,15 +35,6 @@ ipcam_vdec :: ipcam_vdec(int camID, int width, int height)
 	{
 		case 1:
 			pCallback = &DisplayCb_1;
-			break;
-		case 2:
-			pCallback = &DisplayCb_2;
-			break;
-		case 3:
-			pCallback = &DisplayCb_3;
-			break;
-		case 4:
-			pCallback = &DisplayCb_4;
 			break;
 		default:
 			pCallback = &DisplayCb_1;
@@ -142,7 +130,7 @@ int ipcam_vdec::InitMPEG4Dec()
     return 0;
 }
 
-char filename[] = "/data/image.pgm";
+char filename[] = "/mnt/sdcard/image.pgm";
 
 static void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize, char *filename)
 {
@@ -165,7 +153,7 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize, void*
 #ifdef PGM_SAVE
 	char buf[1024];
 #endif
-	android::Mutex display;
+	pthread_mutex_t display;
 
 	//fprintf (stderr, "ipcam_vdec::DecVideo, size = %d\n", bufferSize);
 
@@ -189,9 +177,10 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize, void*
 				pgm_save(pFrame->data[0], pFrame->linesize[0],
 						 pContext->width, pContext->height, buf);
 #endif
-				display.lock();
+				pthread_mutex_lock(&display);
 				pCallback(pFrame->data, (mpgParm.width*mpgParm.height*3)/2);
-				display.unlock();
+				pthread_mutex_unlock(&display);
+
 		}
 		avpkt.size -= len;
 		avpkt.data += len;

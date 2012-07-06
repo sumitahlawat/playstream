@@ -1,6 +1,5 @@
-/home/sumit/workspace/playstream/obj/local/armeabi/objs/rtsp/player/src/ipcam_controller.o: \
- /home/sumit/workspace/playstream/jni/player/src/ipcam_controller.cpp \
- /home/sumit/workspace/playstream/jni/player/include/ipcam_controller.h \
+/home/sumit/workspace/playstream/obj/local/armeabi/objs/rtsp/player/src/ipcam_rtsp_play.o: \
+ /home/sumit/workspace/playstream/jni/player/src/ipcam_rtsp_play.cpp \
  /home/sumit/workspace/playstream/jni/player/include/ipcam_rtsp.h \
  /home/sumit/workspace/playstream/jni/BasicUsageEnvironment/include/BasicUsageEnvironment.hh \
  /home/sumit/workspace/playstream/jni/BasicUsageEnvironment/include/BasicUsageEnvironment0.hh \
@@ -278,8 +277,6 @@
  /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sched.h \
  /home/sumit/workspace/playstream/jni/player/include/player.h \
  /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/android/log.h
-
-/home/sumit/workspace/playstream/jni/player/include/ipcam_controller.h:
 
 /home/sumit/workspace/playstream/jni/player/include/ipcam_rtsp.h:
 

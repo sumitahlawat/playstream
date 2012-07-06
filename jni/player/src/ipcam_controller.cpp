@@ -13,10 +13,11 @@
  */
 
 #include "ipcam_controller.h"
+#include "player.h"
 
 ipcam_controller::ipcam_controller (char* URL)
 {
-    fprintf (stderr, "Contruct IPCAM control engine\n");
+    LOGI ("Contruct IPCAM control engine\n");
 
     IPCAM_rtsp = new ipcam_rtsp_play();
 	IPCAM_rtsp_rec = new ipcam_rtsp_rec();
@@ -24,34 +25,30 @@ ipcam_controller::ipcam_controller (char* URL)
     pRTSPUrl = URL;
 	filename = NULL;
 
-    fprintf (stderr, "Contruct IPCAM control engine completed\n");
+    LOGI ("Contruct IPCAM control engine completed\n");
 }
 
 ipcam_controller::~ipcam_controller ()
 {
-    fprintf (stderr, "Destroy IPCAM control engine\n");
-
+    LOGI ( "Destroy IPCAM control engine\n");
 	filename = NULL;
-
-    fprintf (stderr, "Destroy IPCAM control engine completed\n");
+    LOGI ("Destroy IPCAM control engine completed\n");
 }
 
 int ipcam_controller::InitMedia (ringbufferwriter *pVideoWriter,
 								 ringbufferwriter *pAudioWriter)
 {
-    fprintf (stderr, "Enter InitMedia()\n");
+    LOGI ("Enter InitMedia()\n");
 
 	m_pRBufferAudioWriterRx = pAudioWriter;
 	m_pRBufferVideoWriterRx = pVideoWriter;
 
 	if (IPCAM_rtsp->Init(pRTSPUrl, m_pRBufferVideoWriterRx, m_pRBufferAudioWriterRx) != 1)
     {
-        fprintf (stderr, "setupVideoCall:RTSP Rx Configuration failure\n");
+        LOGI ("setupVideoCall:RTSP Rx Configuration failure\n");
         return -1;
     }
-
-    fprintf (stderr, "IPCAM%d InitMedia() completed\n", bAdapt);
-
+    LOGI ("IPCAM%d InitMedia() completed\n", bAdapt);
     return 1;
 }
 
@@ -61,7 +58,7 @@ int ipcam_controller::InitMedia (char* fname, int fps)
 	
 	if (IPCAM_rtsp_rec->Init(pRTSPUrl, filename, fps) != 1)
 	{
-		fprintf (stderr, "setupVideoCall:RTSP Rx Configuration failure\n");
+		LOGI ("setupVideoCall:RTSP Rx Configuration failure\n");
 		return -1;
 	}
 	return 1;
@@ -69,12 +66,9 @@ int ipcam_controller::InitMedia (char* fname, int fps)
 
 int ipcam_controller::StartMedia ()
 {
-    fprintf (stderr, "Enter StartMedia()\n");
-
+    LOGI ("Enter StartMedia()\n");
     IPCAM_rtsp->StartRecv();
-
-    fprintf (stderr, "StartMedia() completed\n");
-
+    LOGI ("StartMedia() completed\n");
     return 1;
 }
 
@@ -86,12 +80,9 @@ int ipcam_controller::StartMedia_Rec()
 
 int ipcam_controller::CloseMedia ()
 {
-    fprintf (stderr, "Enter CloseMedia()\n");
-
+    LOGI ("Enter CloseMedia()\n");
     IPCAM_rtsp->Close();
-
-    fprintf (stderr, "CloseMedia() completed\n");
-
+    LOGI ( "CloseMedia() completed\n");
     return 1;
 }
 
@@ -103,22 +94,17 @@ int ipcam_controller::CloseMedia_Rec ()
 
 void *ipcam_controller::StartIPCAMTx (void *arg)
 {
-    fprintf (stderr, "Enter StartIPCAMTx()\n");
-
+    LOGI ( "Enter StartIPCAMTx()\n");
     ipcam_controller * IPCAM_controller = (ipcam_controller *)arg;
-
-    fprintf (stderr, "StartIPCAMTx() completed\n");
-
+    LOGI ( "StartIPCAMTx() completed\n");
     return 0;
 }
 
 void *ipcam_controller::StartIPCAMRx (void *arg)
 {
-    fprintf (stderr, "Enter StartIPCAMRx()\n");
+    LOGI ( "Enter StartIPCAMRx()\n");
     ipcam_controller * IPCAM_controller = (ipcam_controller *)arg;
-
-    fprintf (stderr, "StartIPCAMRx() completed\n");
-
+    LOGI ( "StartIPCAMRx() completed\n");
 	return 0;
 }
 

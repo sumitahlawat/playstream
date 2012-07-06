@@ -4,30 +4,23 @@
 #include "ipcam_ringbuf.h"
 #include "ipcam_controller.h"
 #include "ipcam_vdec.h"
-#include <utils/threads.h>
-
-using namespace android;
+#include <pthread.h>
 
 class ipcam_camera
 {
 private:
 	ipcam_controller*	pIpCam;
-
 	ringbuffer*		pVRBCam;
 	ringbuffer*		pARBCam;
 	ringbufferwriter*	pVRBWriter;
 	ringbufferwriter*	pARBWriter;
-
 	pthread_t		ringThreadVCam;
-
 	char*			url;
 	char*			recfilename;
-
 	int 			fps;
 
 public:
 	ipcam_vdec*		pVDec;
-
 	ringbufferreader*	pVRBReader;
 	ringbufferreader*	pARBReader;
 
@@ -69,4 +62,3 @@ public:
 
 
 #endif /* __ipcam_camera_H__ */
-

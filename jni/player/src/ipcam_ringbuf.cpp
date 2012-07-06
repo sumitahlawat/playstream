@@ -33,11 +33,23 @@ ringbuffer::ringbuffer (unsigned int buffer_space)
         m_pBuffer = new unsigned char[m_iBufferSpace];
         memset(m_pBuffer,0x0,buffer_space);
     }
+
+    if (pthread_mutex_init(&m_Lists, NULL) != 0)
+	{
+    	fprintf(stderr, "\n mutex init failed\n");
+	}
+
+    if (pthread_mutex_init(&m_Head, NULL) != 0)
+    {
+       	fprintf(stderr, "\n mutex init failed\n");
+    }
 }
 
 ringbuffer::~ringbuffer ()
 {
     fprintf (stderr, "DeConstruct ringbuffer ()\n");
+    pthread_mutex_destroy(&m_Lists);
+    pthread_mutex_destroy(&m_Head);
     if(m_pBuffer != NULL)
     {
         delete[] m_pBuffer;
@@ -47,15 +59,15 @@ ringbuffer::~ringbuffer ()
 
 void ringbuffer::AttachWriter (ringbufferwriter *s)
 {
-    m_Lists.lock();
+	pthread_mutex_lock(&m_Lists);
     //m_Writers.append(s);
-    m_Writers.add(s);
-    m_Lists.unlock();
+    m_Writers.push_back(s);
+    pthread_mutex_unlock(&m_Lists);
 }
 
 void ringbuffer::DetachWriter (ringbufferwriter *s)
 {
-    m_Lists.lock();
+	pthread_mutex_lock(&m_Lists);
 
     //int iIndex = m_Writers.indexOf(s,0);
     int iIndex = m_Writers.indexOf(s);
@@ -63,7 +75,7 @@ void ringbuffer::DetachWriter (ringbufferwriter *s)
     {
         m_Writers.removeAt(iIndex);
     }
-    m_Lists.unlock();
+    pthread_mutex_unlock(&m_Lists);
 }
 
 int ringbuffer::AddToBuffer (unsigned char *data, int len, bool must_fit)
@@ -71,7 +83,7 @@ int ringbuffer::AddToBuffer (unsigned char *data, int len, bool must_fit)
     int plus;
     ringbufferreader *reader;
 
-    m_Head.lock();
+    pthread_mutex_lock(&m_Head);
 
     if (len > 0)
     {
@@ -91,14 +103,14 @@ int ringbuffer::AddToBuffer (unsigned char *data, int len, bool must_fit)
         m_iBytesWritten += len;
     }
 
-    m_Lists.lock(); // prevent list manipulation while we're busy
+    pthread_mutex_lock(&m_Lists);  // prevent list manipulation while we're busy
     int iNumberofReaders = m_Readers.size();
     m_iMaxLength = 0;
 
     for (int iCount = 0; iCount < iNumberofReaders ; iCount++)
     {
         reader = m_Readers[iCount];
-        reader->m_Lock.lock();
+        pthread_mutex_lock(&reader->m_Lock);
 
         reader->m_iMyBufferLength += len;
         if (reader->m_iMyBufferLength > m_iMaxLength)
@@ -108,30 +120,29 @@ int ringbuffer::AddToBuffer (unsigned char *data, int len, bool must_fit)
 
         if (len > 0)
         {
-            reader->ReaderVector.add(len);
+            reader->ReaderVector.push_back(len);
             if (reader->ReaderVector.size() == 1 || !reader->m_queued)
             {
 				//fprintf(stderr,"we have data len %d ... send signal ****", len);
-                reader->m_DataReady.signal();
+            	pthread_cond_signal (&reader->m_DataReady);
             }
         }
-        reader->m_Lock.unlock();
+        pthread_mutex_unlock(&reader->m_Lock);
     }
 
 	// update unread data
 	m_iMaxUnreadData += len;
-	
-    m_Lists.unlock();
-    m_Head.unlock();
+	pthread_mutex_unlock(&m_Lists);
+	pthread_mutex_unlock(&m_Head);
     return len;
 }
 
 int ringbuffer::SpaceLeft ()
 {
     int n;
-    m_Head.lock();
+    pthread_mutex_lock(&m_Head);
     n = m_iBufferSpace - m_iMaxLength;
-    m_Head.unlock();
+    pthread_mutex_unlock(&m_Head);
     return n;
 }
 
@@ -140,69 +151,69 @@ int ringbuffer::SpaceUsed ()
     ringbufferreader *reader;
     int n;
 
-    m_Head.lock();
-    m_Lists.lock(); // prevent list manipulation while we're busy
+    pthread_mutex_lock(&m_Head);
+    pthread_mutex_lock(&m_Lists);  // prevent list manipulation while we're busy
     m_iMaxLength = 0;
     for (int iCount = 0; iCount < m_Readers.size(); iCount++)
     {
         reader = m_Readers[iCount];
-        reader->m_Lock.lock();
+        pthread_mutex_lock(&reader->m_Lock);
         if (reader->m_iMyBufferLength > m_iMaxLength)
         {
             m_iMaxLength = reader->m_iMyBufferLength;
         }
-        reader->m_Lock.unlock();
+        pthread_mutex_unlock(&reader->m_Lock);
     }
-    m_Lists.unlock();
+    pthread_mutex_unlock(&m_Lists);
 
     n = m_iMaxLength;
-    m_Head.unlock();
+    pthread_mutex_unlock(&m_Head);
     return n;
 }
 
 void ringbuffer::AttachReader (ringbufferreader *r)
 {
-    m_Head.lock(); // make sure BufferHead doesn't change
+	pthread_mutex_lock(&m_Head); // make sure BufferHead doesn't change
     r->m_iBufferTail = m_iBufferHead;
-    m_Lists.lock();
+    pthread_mutex_lock(&m_Lists);
     //m_Readers.append(r);
-    m_Readers.add(r);
-    m_Lists.unlock();
-    m_Head.unlock();
+    m_Readers.push_back(r);
+    pthread_mutex_unlock(&m_Lists);
+    pthread_mutex_unlock(&m_Head);
 }
 
 void ringbuffer::DetachReader (ringbufferreader *r)
 {
-    m_Lists.lock();
+	pthread_mutex_lock(&m_Lists);
     //int iIndex = m_Readers.indexOf(r,0);
     int iIndex = m_Readers.indexOf(r);
     if(iIndex != -1)
     {
         m_Readers.removeAt(iIndex);
     }
-    m_Lists.unlock();
+    pthread_mutex_unlock(&m_Lists);
 }
 
 void ringbuffer::Flush ()
 {
     ringbufferreader *reader = 0;
+    pthread_mutex_lock(&m_Head);   // make sure BufferHead doesn't change
+    pthread_mutex_lock(&m_Lists);
 
-    m_Head.lock(); // make sure BufferHead doesn't change
-    m_Lists.lock();
     m_iMaxLength = 0;
     for (int iCount = 0; iCount < m_Readers.size(); iCount++)
     {
         reader = m_Readers[iCount];
-        reader->m_Lock.lock();
+        pthread_mutex_lock(&reader->m_Lock);
         reader->m_iBufferTail = m_iBufferHead; // reset poiinters
 
         reader->ReaderVector.clear();
         reader->m_iMyBufferLength = 0;
         reader->m_queued = false;
-        reader->m_Lock.unlock();
+        pthread_mutex_unlock(&reader->m_Lock);
     }
-    m_Lists.unlock();
-    m_Head.unlock();
+    pthread_mutex_unlock(&m_Lists);
+    pthread_mutex_unlock(&m_Head);
 }
 
 unsigned int ringbuffer::iGetBufferLength ()
@@ -283,7 +294,7 @@ int ringbufferreader::ReadFromBufferTail (unsigned char *data, unsigned int requ
         //fprintf(stderr, "Entering critical section\n");
 		//fprintf(stderr, "\t\t m_iMyBufferLength %d, m_queued %d, m_iLowWaterMark %d \n",
 			//m_iMyBufferLength, m_queued, m_iLowWaterMark);
-        m_Lock.lock();
+    	pthread_mutex_lock(&m_Lock);
         while (m_iMyBufferLength == 0 || (!m_queued && m_iMyBufferLength < m_iLowWaterMark))
         {
 			//if (!m_DataReady.waitRelative(m_Lock, seconds(2)))
@@ -302,7 +313,7 @@ int ringbufferreader::ReadFromBufferTail (unsigned char *data, unsigned int requ
         buflen = m_iMyBufferLength;
         //fprintf (stderr, "Enough data queued %d\n", buflen);
         m_queued = true;
-		m_Lock.unlock();
+        pthread_mutex_unlock(&m_Lock);
     }
 
     if (len > buflen)
@@ -327,7 +338,7 @@ int ringbufferreader::ReadFromBufferTail (unsigned char *data, unsigned int requ
         }
     }
     //QMutexLocker lock(&m_Lock); // keep this lock minimal
-    m_Lock.lock();
+    pthread_mutex_lock(&m_Lock);
     m_iMyBufferLength -= len;
     if ((requested_len == 160))
     {
@@ -340,7 +351,7 @@ int ringbufferreader::ReadFromBufferTail (unsigned char *data, unsigned int requ
 
     //update Unread data
     m_pRing->m_iMaxUnreadData -= len;
-    m_Lock.unlock();
+    pthread_mutex_unlock(&m_Lock);
    return len;
 }
 
@@ -348,22 +359,22 @@ int ringbufferreader::ReadFromBufferHead (unsigned char *data, unsigned int len,
 {
     unsigned int buflen, head;
 
-    m_Lock.lock();
+    pthread_mutex_lock(&m_Lock);
     len = _FetchNextPacketLength();
     if (m_iMyBufferLength <= 0)
     {
         if (m_DataReady.waitRelative(m_Lock, (nsecs_t)time)) {}
     }
+    pthread_mutex_unlock(&m_Lock);
+    pthread_mutex_lock(&m_Lock);
 
-    m_Lock.unlock();
-    m_Lock.lock();
     buflen = m_iMyBufferLength;
     if (len > buflen)
     {
         len = buflen;
     }
     head = (m_iBufferTail + buflen - len) % m_pRing->m_iBufferSpace;
-    m_Lock.unlock();
+    pthread_mutex_unlock(&m_Lock);
 
     if (len > 0)
     {
@@ -380,12 +391,12 @@ int ringbufferreader::ReadFromBufferHead (unsigned char *data, unsigned int len,
     }
     if (clear)
     {
-        m_Lock.lock();
+    	pthread_mutex_lock(&m_Lock);
         m_iMyBufferLength = 0;
 
         ReaderVector.clear();
         m_iBufferTail = m_pRing->m_iBufferHead;
-        m_Lock.unlock();
+        pthread_mutex_unlock(&m_Lock);
     }
     return len;
 }
@@ -420,7 +431,7 @@ unsigned int ringbufferreader::GetHighWaterMark () const
 
 unsigned int ringbufferreader :: _FetchNextPacketLength ()
 {
-    if (!ReaderVector.isEmpty())
+    if (!ReaderVector.empty())
     {
     	/*
         android::Vector<unsigned int>::iterator itVectorData;
@@ -430,7 +441,7 @@ unsigned int ringbufferreader :: _FetchNextPacketLength ()
         */
 		int index = ReaderVector.size() - 1;
         unsigned int datalength = ReaderVector.itemAt(index);
-		ReaderVector.pop();
+		ReaderVector.pop_back();
         return datalength;
     }
     return 0;

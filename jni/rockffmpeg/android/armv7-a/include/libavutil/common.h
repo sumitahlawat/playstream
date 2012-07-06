@@ -43,6 +43,16 @@
 #   define AV_NE(be, le) (le)
 #endif
 
+#ifdef __cplusplus
+#define __STDC_CONSTANT_MACROS
+
+#ifdef  _STDINT_H
+#undef _STDINT_H
+#endif
+
+#include <stdint.h>
+#endif
+
 //rounded division & shift
 #define RSHIFT(a,b) ((a) > 0 ? ((a) + ((1<<(b))>>1))>>(b) : ((a) + ((1<<(b))>>1)-1)>>(b))
 /* assume b>0 */

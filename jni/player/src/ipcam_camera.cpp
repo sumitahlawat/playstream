@@ -13,6 +13,7 @@
  */
 
 #include "ipcam_camera.h"
+#include "player.h"
 
 //forward
 void *ipcam_camera_thread (void *p);
@@ -29,14 +30,10 @@ ipcam_camera::ipcam_camera(char* URL, int ID, int frame_rate)
 	pARBReader = NULL;
 
 	recfilename = NULL;
-
 	fps = frame_rate;
-	
 	url = URL;
 	camID = ID;
-
     pVDec = NULL;
-
 	isPlaying = 0;
 	isRecording = 0;
 }
@@ -44,21 +41,16 @@ ipcam_camera::ipcam_camera(char* URL, int ID, int frame_rate)
 ipcam_camera::~ipcam_camera()
 {
 	pIpCam = NULL;
-
 	pVRBCam = NULL;
 	pARBCam = NULL;
 	pVRBWriter = NULL;
 	pARBWriter = NULL;
 	pVRBReader = NULL;
 	pARBReader = NULL;
-
 	recfilename = NULL;
-
 	fps = 0;
-
 	url = NULL;
 	pVDec = NULL;
-
 	pIpCam = NULL;
 }
 

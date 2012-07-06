@@ -10,5 +10,9 @@ public class PlaystreamActivity extends Activity {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.main);
+        Rtsplayer player = new Rtsplayer();
+        String url = "rtsp://ahlawat.servehttp.com/live.sdp";
+        String recfile = "/mnt/sdcard/rec.mp4";
+        player.CreateRec(url.getBytes(), recfile.getBytes(), 10, 10, 10, 10);
     }
 }
