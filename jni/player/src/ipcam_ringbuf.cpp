@@ -70,10 +70,12 @@ void ringbuffer::DetachWriter (ringbufferwriter *s)
 	pthread_mutex_lock(&m_Lists);
 
     //int iIndex = m_Writers.indexOf(s,0);
-    int iIndex = m_Writers.indexOf(s);
+	int iIndex = std::find(m_Writers.begin(), m_Writers.end(), s) - m_Writers.begin();
+    //int iIndex = m_Writers.indexOf(s);
     if(iIndex != -1)
     {
-        m_Writers.removeAt(iIndex);
+    	m_Writers.erase(m_Writers.begin() + iIndex);
+        //m_Writers.removeAt(iIndex);
     }
     pthread_mutex_unlock(&m_Lists);
 }
@@ -186,10 +188,12 @@ void ringbuffer::DetachReader (ringbufferreader *r)
 {
 	pthread_mutex_lock(&m_Lists);
     //int iIndex = m_Readers.indexOf(r,0);
-    int iIndex = m_Readers.indexOf(r);
+	int iIndex = std::find(m_Readers.begin(), m_Readers.end(), r) - m_Readers.begin();
+    //int iIndex = m_Readers.indexOf(r);
     if(iIndex != -1)
     {
-        m_Readers.removeAt(iIndex);
+    	m_Readers.erase(m_Readers.begin() + iIndex);
+        //m_Readers.removeAt(iIndex);
     }
     pthread_mutex_unlock(&m_Lists);
 }
@@ -306,7 +310,11 @@ int ringbufferreader::ReadFromBufferTail (unsigned char *data, unsigned int requ
             }
             */
 			//m_DataReady.wait(m_Lock);
-			m_DataReady.waitRelative(m_Lock, milliseconds(20));
+        	timespec temp;
+        	temp.tv_sec = 0;
+        	temp.tv_nsec = 20000000;
+        	pthread_cond_timedwait(&m_DataReady, &m_Lock, &temp);
+//			/m_DataReady.waitRelative(m_Lock, milliseconds(20));
         }
         len = _FetchNextPacketLength();
 		//fprintf (stderr, "_FetchNextPacketLength %d\n", len);
@@ -363,7 +371,10 @@ int ringbufferreader::ReadFromBufferHead (unsigned char *data, unsigned int len,
     len = _FetchNextPacketLength();
     if (m_iMyBufferLength <= 0)
     {
-        if (m_DataReady.waitRelative(m_Lock, (nsecs_t)time)) {}
+    	timespec temp;
+    	temp.tv_sec = 0;
+    	temp.tv_nsec = time;
+        if (pthread_cond_timedwait(&m_DataReady, &m_Lock, &temp)) {}
     }
     pthread_mutex_unlock(&m_Lock);
     pthread_mutex_lock(&m_Lock);
@@ -440,7 +451,7 @@ unsigned int ringbufferreader :: _FetchNextPacketLength ()
         ReaderVector.erase(itVectorData);
         */
 		int index = ReaderVector.size() - 1;
-        unsigned int datalength = ReaderVector.itemAt(index);
+        unsigned int datalength = ReaderVector.at(index);
 		ReaderVector.pop_back();
         return datalength;
     }

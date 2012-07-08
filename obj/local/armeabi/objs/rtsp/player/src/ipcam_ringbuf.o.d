@@ -20,41 +20,40 @@
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stddef.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_cstring.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/string.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/string.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/cdefs.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/cdefs_elf.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/android/api-level.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/malloc.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/string.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs_elf.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/malloc.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/using/cstring \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/climits \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/limits.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/limits.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/limits.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/limits.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/internal_types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/limits.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/syslimits.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/limits.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/limits.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/limits.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/internal_types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/limits.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/syslimits.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_cstdlib.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stdlib.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/stdlib.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/alloca.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/strings.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/stdint.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/_types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/_types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/posix_types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/stddef.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/compiler.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/posix_types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/types.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/kernel.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/sysmacros.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/memory.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/stdlib.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/alloca.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/strings.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdint.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/_types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/_types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/posix_types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/stddef.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/compiler.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/posix_types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/types.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/kernel.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/sysmacros.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/memory.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_cmath.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/math.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/math.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/math.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_pair.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/type_traits.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/type_manips.h \
@@ -72,7 +71,7 @@
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/../../gabi++/include/cstddef \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_cstdio.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stdio.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/stdio.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/stdio.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stdarg.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_construct.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_alloc.c \
@@ -88,19 +87,19 @@
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_list.c \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_carray.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/pthread.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/pthread.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/pthread.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/time.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/time.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/time.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/time.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/siginfo.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm-generic/siginfo.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/time.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/time.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/time.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/siginfo.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/siginfo.h \
  /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/signal.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/signal.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/signal.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm-generic/signal.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/sigcontext.h \
- /home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sched.h
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/signal.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/signal.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/signal.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/sigcontext.h \
+ /home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sched.h
 
 /home/sumit/workspace/playstream/jni/player/include/ipcam_ringbuf.h:
 
@@ -142,15 +141,13 @@
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/string.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/string.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/string.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/cdefs.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/cdefs_elf.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs_elf.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/android/api-level.h:
-
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/malloc.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/malloc.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/using/cstring:
 
@@ -158,59 +155,59 @@
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/limits.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/limits.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/limits.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/limits.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/limits.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/limits.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/limits.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/internal_types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/internal_types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/limits.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/limits.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/syslimits.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/syslimits.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_cstdlib.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stdlib.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/stdlib.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/stdlib.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/alloca.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/alloca.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/strings.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/strings.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/stdint.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdint.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/_types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/_types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/_types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/_types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/posix_types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/posix_types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/stddef.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/stddef.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/compiler.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/compiler.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/posix_types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/posix_types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/types.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/types.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/machine/kernel.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/kernel.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/sysmacros.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/sysmacros.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/memory.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/memory.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_cmath.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/math.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/math.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/math.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stl/_pair.h:
 
@@ -246,7 +243,7 @@
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stdio.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/stdio.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/stdio.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/stdarg.h:
 
@@ -278,28 +275,28 @@
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/pthread.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/pthread.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/pthread.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/time.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/time.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/time.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sys/time.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/time.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/linux/time.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/time.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/siginfo.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/siginfo.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm-generic/siginfo.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/siginfo.h:
 
 /home/sumit/Downloads/android-ndk-r8/sources/cxx-stl/stlport/stlport/signal.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/../include/signal.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/../include/signal.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/signal.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/signal.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm-generic/signal.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/signal.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/asm/sigcontext.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/sigcontext.h:
 
-/home/sumit/Downloads/android-ndk-r8/platforms/android-8/arch-arm/usr/include/sched.h:
+/home/sumit/Downloads/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sched.h:

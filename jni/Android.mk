@@ -242,7 +242,7 @@ LOCAL_SRC_FILES	:= \
 		player/src/ipcam_ringsink.cpp \
 		player/src/com_uis_monitor_Rtsplayer.cpp
 		
-LOCAL_LDLIBS := -llog -ldl -ljnigraphics -lz -lm $(LOCAL_PATH)/rockffmpeg/android/armv7-a/libffmpeg.so
+LOCAL_LDLIBS := -llog -ldl -ljnigraphics -lz -lm $(LOCAL_PATH)/rockffmpeg/android/armv7-a/libffmpeg.so 
 
 LOCAL_STATIC_LIBRARIES := \
 		libliveMedia \
@@ -253,4 +253,4 @@ LOCAL_SHARED_LIBRARY := ffmpeg-prebuilt
 
 #include $(BUILD_EXECUTABLE)
 include $(BUILD_SHARED_LIBRARY)
-$(call import-module,cxx-stl/stlport,cxx-stl/gnu-libstdc++)
+#$(call import-module,cxx-stl/stlport)

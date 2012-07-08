@@ -20,13 +20,13 @@
 #define VIDEO_HEIGHT	242//240
 
 // SurfaceFlinger
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <surfaceflinger/ISurfaceComposer.h>
+//#include <surfaceflinger/Surface.h>
+//#include <surfaceflinger/ISurface.h>
+//#include <surfaceflinger/SurfaceComposerClient.h>
+//#include <surfaceflinger/ISurfaceComposer.h>
 
 //SoftwareRenderer
-#include "SoftwareRenderer.h"
+//#include "SoftwareRenderer.h"
 
 #include "ipcam_camera.h"
 #include "player.h"
@@ -48,89 +48,89 @@ ipcam_vdec *videoDecode2 = NULL;
 ipcam_vdec *videoDecode3 = NULL;
 ipcam_vdec *videoDecode4 = NULL;
 
-SoftwareRenderer *renderer1 = NULL;
-SoftwareRenderer *renderer2 = NULL;
-SoftwareRenderer *renderer3 = NULL;
-SoftwareRenderer *renderer4 = NULL;
+//SoftwareRenderer *renderer1 = NULL;
+//SoftwareRenderer *renderer2 = NULL;
+//SoftwareRenderer *renderer3 = NULL;
+//SoftwareRenderer *renderer4 = NULL;
 
-sp<SurfaceComposerClient> client1;
-sp<SurfaceControl> surface1;
-sp<ISurface> isurface1;
+//sp<SurfaceComposerClient> client1;
+//sp<SurfaceControl> surface1;
+//sp<ISurface> isurface1;
 
-sp<SurfaceComposerClient> client2;
-sp<SurfaceControl> surface2;
-sp<ISurface> isurface2;
+//sp<SurfaceComposerClient> client2;
+//sp<SurfaceControl> surface2;
+//sp<ISurface> isurface2;
 
-sp<SurfaceComposerClient> client3;
-sp<SurfaceControl> surface3;
-sp<ISurface> isurface3;
+//sp<SurfaceComposerClient> client3;
+//sp<SurfaceControl> surface3;
+//sp<ISurface> isurface3;
 
-sp<SurfaceComposerClient> client4;
-sp<SurfaceControl> surface4;
-sp<ISurface> isurface4;
+//sp<SurfaceComposerClient> client4;
+//sp<SurfaceControl> surface4;
+//sp<ISurface> isurface4;
 
-namespace android {
-	class Test {
-	public:
-		static const sp<ISurface>& getISurface(const sp<SurfaceControl>& s) {
-			return s->getISurface();
-		}
-	};
-};
+//namespace android {
+//	class Test {
+//	public:
+//		static const sp<ISurface>& getISurface(const sp<SurfaceControl>& s) {
+//			return s->getISurface();
+//		}
+//	};
+//};
 
 void DisplayCb_1 (uint8_t* aData[], int aDataLen)
 {
-	size_t offset = 0;
-	unsigned fsize = (aDataLen*2)/3;
-	//LOGV("DisplayCb callback -- display decoded framelength %d\n", aDataLen);
-	
-	uint8_t *tmpbuf = new uint8_t[aDataLen];
-	memset(tmpbuf, 0, aDataLen);
-	
-	memcpy(tmpbuf, aData[0], size_t(fsize));
-	offset += size_t(fsize);
-	memcpy(tmpbuf+offset, aData[1], size_t(fsize/4));
-	offset += size_t(fsize/4);
-	memcpy(tmpbuf+offset, aData[2], size_t(fsize/4));
-	offset += size_t(fsize/4);
-	
-	if(renderer1 != NULL) {
-		renderer1->render(tmpbuf,  aDataLen, NULL);
-		//LOGV("Rendering CAM 1");
-	}
-	//fprintf(stderr, "*********total frame size %d, camID %d\n",offset,camID );
-	free (tmpbuf);
+//	size_t offset = 0;
+//	unsigned fsize = (aDataLen*2)/3;
+//	//LOGV("DisplayCb callback -- display decoded framelength %d\n", aDataLen);
+//
+//	uint8_t *tmpbuf = new uint8_t[aDataLen];
+//	memset(tmpbuf, 0, aDataLen);
+//
+//	memcpy(tmpbuf, aData[0], size_t(fsize));
+//	offset += size_t(fsize);
+//	memcpy(tmpbuf+offset, aData[1], size_t(fsize/4));
+//	offset += size_t(fsize/4);
+//	memcpy(tmpbuf+offset, aData[2], size_t(fsize/4));
+//	offset += size_t(fsize/4);
+//
+//	if(renderer1 != NULL) {
+//		renderer1->render(tmpbuf,  aDataLen, NULL);
+//		//LOGV("Rendering CAM 1");
+//	}
+//	//fprintf(stderr, "*********total frame size %d, camID %d\n",offset,camID );
+//	free (tmpbuf);
 }
 
 void create_surfaces(int ID, int x, int y)
 {
-	if(ID==1)
-	{
-		//Create Surfaces
-		client1 = new SurfaceComposerClient();
-		client1->setOrientation(0, ISurfaceComposer::eOrientationDefault, 0);
-		// create pushbuffer surface
-		surface1 = client1->createSurface(getpid(), 0,	VIDEO_WIDTH,
-														VIDEO_HEIGHT,
-														PIXEL_FORMAT_UNKNOWN,
-														ISurfaceComposer::ePushBuffers);
-
-		LOGD("Created SurfaceControl 1\n");
-
-		client1->openTransaction();
-		surface1->setLayer(1500000);
-		surface1->setPosition(x,y);
-		client1->closeTransaction();
-
-		// get to the isurface
-		isurface1 = Test::getISurface(surface1);
-		LOGD("isurface = %p\n", isurface1.get());
-
-		renderer1 = new SoftwareRenderer(OMX_COLOR_FormatYUV420Planar, isurface1,
-										VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH, VIDEO_HEIGHT);
-
-		LOGD("///// Surface 1 Created ////// \n");
-	}
+//	if(ID==1)
+//	{
+//		//Create Surfaces
+//		client1 = new SurfaceComposerClient();
+//		client1->setOrientation(0, ISurfaceComposer::eOrientationDefault, 0);
+//		// create pushbuffer surface
+//		surface1 = client1->createSurface(getpid(), 0,	VIDEO_WIDTH,
+//														VIDEO_HEIGHT,
+//														PIXEL_FORMAT_UNKNOWN,
+//														ISurfaceComposer::ePushBuffers);
+//
+//		LOGD("Created SurfaceControl 1\n");
+//
+//		client1->openTransaction();
+//		surface1->setLayer(1500000);
+//		surface1->setPosition(x,y);
+//		client1->closeTransaction();
+//
+//		// get to the isurface
+//		isurface1 = Test::getISurface(surface1);
+//		LOGD("isurface = %p\n", isurface1.get());
+//
+//		renderer1 = new SoftwareRenderer(OMX_COLOR_FormatYUV420Planar, isurface1,
+//										VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH, VIDEO_HEIGHT);
+//
+//		LOGD("///// Surface 1 Created ////// \n");
+//	}
 }
 
 jint Java_com_uis_monitor_Rtsplayer_CreateRec(JNIEnv *env, jobject obj,
@@ -218,7 +218,7 @@ jint Java_com_uis_monitor_Rtsplayer_DestroyRec(JNIEnv *env, jobject obj, jint ID
 	{
 		case 1:
 			MyIPCAM1->deinit();
-			surface1->clear();
+//			surface1->clear();
 			LOGD("IPCAM %d DEINIT Complete\n", ID);
 			break;
 			
