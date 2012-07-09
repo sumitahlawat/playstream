@@ -3,6 +3,7 @@
 #define _IPCAM_RINGBUF_H_
 
 #include <vector>
+#include <algorithm>
 //#include <utils/SortedVector.h>
 #include <list>
 #include <pthread.h>

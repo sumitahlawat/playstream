@@ -70,7 +70,8 @@ void ringbuffer::DetachWriter (ringbufferwriter *s)
 	pthread_mutex_lock(&m_Lists);
 
     //int iIndex = m_Writers.indexOf(s,0);
-	int iIndex = std::find(m_Writers.begin(), m_Writers.end(), s) - m_Writers.begin();
+	//int iIndex = std::find(m_Writers.begin(), m_Writers.end(), s) - m_Writers.begin();
+	int iIndex = find(m_Writers.begin(), m_Writers.end(), s) - m_Writers.begin();
     //int iIndex = m_Writers.indexOf(s);
     if(iIndex != -1)
     {
