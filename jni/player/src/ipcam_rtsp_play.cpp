@@ -59,6 +59,7 @@ int ipcam_rtsp_play::Init(char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
 		return -1;
 	}
 
+    LOGI ("ipcam_rtsp::Init(): Next  \n");
 	//rtspClient->sendDescribeCommand(continueAfterDESCRIBE);
     return 1;
 }

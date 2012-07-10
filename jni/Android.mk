@@ -240,7 +240,7 @@ LOCAL_SRC_FILES	:= \
 		player/src/ipcam_camera.cpp \
 		player/src/ipcam_ringbuf.cpp \
 		player/src/ipcam_ringsink.cpp \
-		player/src/com_uis_monitor_Rtsplayer.cpp
+		player/src/my_streamplayer_Rtsplayer.cpp
 		
 LOCAL_LDLIBS := -llog -ldl -ljnigraphics -lz -lm $(LOCAL_PATH)/rockffmpeg/android/armv7-a/libffmpeg.so 
 

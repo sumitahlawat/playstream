@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     my_streamplayer_Rtsplayer
  * Method:    CreateRec
- * Signature: ([B[BIIII)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;IIII)V
  */
 JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_CreateRec
-  (JNIEnv *, jobject, jbyteArray, jbyteArray, jint, jint, jint, jint);
+  (JNIEnv *, jobject, jstring, jstring, jint, jint, jint, jint);
 
 /*
  * Class:     my_streamplayer_Rtsplayer

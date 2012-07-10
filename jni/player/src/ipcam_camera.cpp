@@ -131,6 +131,8 @@ int ipcam_camera::stop_playback()
 void ipcam_camera::set_recFile(char* fname)
 {
 	recfilename = fname;
+
+	LOGD ("Enter %s for %s\n", __func__, recfilename);
 }
 
 int ipcam_camera::start_recording()
