@@ -33,9 +33,6 @@ void rec_subsessionAfterPlaying(void* clientData);
 void rec_subsessionByeHandler(void* clientData);
 void* rec_StartPlay(void* arg);
 
-
-
-
 // Forward function definitions:
 
 // RTSP 'response handlers':
@@ -385,7 +382,6 @@ ipcam_rtsp_rec::ipcam_rtsp_rec()
 	env = BasicUsageEnvironment::createNew(*scheduler);
 
 	rtspClient = NULL;
-	session = NULL;
 
 	watchVariable = 0;
 
@@ -419,7 +415,7 @@ int ipcam_rtsp_rec::Init(char *url, char* fname, int fps)
 
 	rtspClient->sendDescribeCommand(continueAfterDESCRIBE);
 
-	LOGI( "[MSH] ipcam_rtsp::Init_Rec(): Leaving.\n");
+	LOGI( "ipcam_rtsp::Init_Rec(): Leaving.\n");
 	return 1;
 }
 
@@ -467,7 +463,7 @@ void ipcam_rtsp_rec::CloseMediaSinks()
 
 void* rec_StartPlay(void* arg)
 {
-	ipcam_rtsp *pSHRtspRx = (ipcam_rtsp*)arg;
+	ipcam_rtsp_rec *pSHRtspRx = (ipcam_rtsp_rec*)arg;
 	RTSPClient *rtspClient = (RTSPClient*)pSHRtspRx->rtspClient;
 	MediaSession* session = pSHRtspRx->session;
 	UsageEnvironment* env = pSHRtspRx->env;

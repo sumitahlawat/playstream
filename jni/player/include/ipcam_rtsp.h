@@ -34,13 +34,9 @@ class ipcam_rtsp
 		
 		virtual ~ipcam_rtsp() { };
 
-
 	public:
 		pthread_t rtsp_thread; ///< the thread hanlder of created RTSP thread
 		UsageEnvironment* env; ///< Specify the environment parameters
-		ourRTSPClient* rtspClient;    ///< Specify the rtsp client
-		MediaSession* session; ///< Specify the rtsp sessions
-
 };
 
 class ipcam_rtsp_play :  public ipcam_rtsp
@@ -52,11 +48,11 @@ class ipcam_rtsp_play :  public ipcam_rtsp
     public:
 		void CloseMediaSinks ();
 		int StartRecv ();
-		int Close (){ return 0;};
+		int Close ();
 		
 		ipcam_rtsp_play ();
 		~ipcam_rtsp_play ();
-
+		RTSPClient* rtspClient;
 		int Init (char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
 					ringbufferwriter *pCodecHRtspAudioBuffer);
 
@@ -74,7 +70,7 @@ class ipcam_rtsp_rec :  public ipcam_rtsp
 		int Close ();
 		
 		int Init(char *url, char* filename, int fps);
-
+		ourRTSPClient* rtspClient;
 		ipcam_rtsp_rec ();
 		~ipcam_rtsp_rec ();
 };
