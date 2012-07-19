@@ -57,21 +57,6 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 		char* sdpDescription = resultString;
 		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
-		// Create a media session object from this SDP description:
-		scs.session = MediaSession::createNew(env, sdpDescription);
-		delete[] sdpDescription; // because we don't need it anymore
-		if (scs.session == NULL) {
-			LOGI( "Failed to create a MediaSession object from the SDP description: %s \n" ,env.getResultMsg());
-			break;
-		} else if (!scs.session->hasSubsessions()) {
-			LOGI("This session has no media subsessions (i.e., no \"m=\" lines)\n");
-			break;
-		}
-
-		// Then, create and set up our data source objects for the session.  We do this by iterating over the session's 'subsessions',
-		// calling "MediaSubsession::initiate()", and then sending a RTSP "SETUP" command, on each one.
-		// (Each 'subsession' will have its own data source.)
-		scs.iter = new MediaSubsessionIterator(*scs.session);
 		playsetupNextSubsession(rtspClient);
 		return;
 	} while (0);
@@ -268,7 +253,6 @@ ipcam_rtsp_play::ipcam_rtsp_play()
     TaskScheduler* scheduler = BasicTaskScheduler::createNew();
     env = BasicUsageEnvironment::createNew(*scheduler);
     rtspClient = NULL;
-    session = NULL;
 
     watchVariable = 0;
 }
@@ -331,8 +315,8 @@ int ipcam_rtsp_play::Close()
     // Close RingBuf Sink:
     CloseMediaSinks();
 
-    Medium::close(session);
-    Medium::close(rtspClient);
+//    Medium::close(session);
+//    Medium::close(rtspClient);
 
 	LOGD(   "ipcam_rtsp::Close(): Leaving.\n");
     return 1;
@@ -340,55 +324,16 @@ int ipcam_rtsp_play::Close()
 
 void ipcam_rtsp_play::CloseMediaSinks()
 {
-    MediaSubsession* subsession;
     
-	if (session)
-	{
-		MediaSubsessionIterator iter(*session);
-		while ((subsession = iter.next()) != NULL)
-		{
-			Medium::close(subsession->sink);
-			subsession->sink = NULL;
-		}
-	}
 }
 
 void* StartPlay(void* arg)
 {
     ipcam_rtsp_play *pSHRtspRx = (ipcam_rtsp_play*)arg;
     RTSPClient *rtspClient = (RTSPClient*)pSHRtspRx->rtspClient;
-    MediaSession* session = pSHRtspRx->session;
     UsageEnvironment* env = pSHRtspRx->env;
 
     env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
 
     return NULL;
-}
-
-void subsessionAfterPlaying(void* clientData)
-{
-	LOGI("+Enter %s",__func__);
-    // Begin by closing this media subsession's stream:
-    MediaSubsession* subsession = (MediaSubsession*)clientData;
-    Medium::close(subsession->sink);
-    subsession->sink = NULL;
-
-    // Next, check whether *all* subsessions' streams have now been closed:
-    MediaSession& session = subsession->parentSession();
-    MediaSubsessionIterator iter(session);
-    while ((subsession = iter.next()) != NULL)
-    {
-        if (subsession->sink != NULL)
-        {
-            return; // this subsession is still active
-        }
-    }
-    LOGI("-Exit %s",__func__);
-}
-
-void subsessionByeHandler(void* clientData)
-{
-    MediaSubsession* subsession = (MediaSubsession*)clientData;
-    // Act now as if the subsession had closed:
-    subsessionAfterPlaying (subsession);
 }

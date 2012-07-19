@@ -213,7 +213,6 @@ void continueAfterPLAY(RTSPClient* rtspClient, int resultCode, char* resultStrin
 	shutdownStream(rtspClient);
 }
 
-
 // Implementation of the other event handlers:
 
 void sessionAfterPlaying(void* clientData) {
@@ -231,7 +230,6 @@ void recsubsessionAfterPlaying(void* clientData) {
 	RTSPClient* rtspClient = (RTSPClient*)(subsession->miscPtr);
 
 	LOGI("recsubsessionAfterPlaying \n\n");
-
 	// Begin by closing this subsession's stream:
 	Medium::close(subsession->sink);
 	subsession->sink = NULL;
@@ -403,17 +401,14 @@ int ipcam_rtsp_rec::Init(char *url, char* fname, int fps)
 
 	LOGD("fname from UI ***** %s", fname);
 
-	this->filename = fname;
-
 	watchVariable = 0;
 
-	rtspClient = ourRTSPClient::createNew(*env, url, verbosityLevel, applicationName, 0, fname);
-	if (rtspClient == NULL) {
-		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, fname,  env->getResultMsg() );
-		return -1;
-	}
-
-	rtspClient->sendDescribeCommand(continueAfterDESCRIBE);
+	this->filename = fname;
+//	rtspClient = ourRTSPClient::createNew(*env, url, verbosityLevel, applicationName, 0, fname);
+//	if (rtspClient == NULL) {
+//		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, fname,  env->getResultMsg() );
+//		return -1;
+//	}
 
 	LOGI( "ipcam_rtsp::Init_Rec(): Leaving.\n");
 	return 1;
@@ -421,6 +416,7 @@ int ipcam_rtsp_rec::Init(char *url, char* fname, int fps)
 
 int ipcam_rtsp_rec::StartRecv()
 {
+	LOGI( "ipcam_rtsp_rec : recording thread start\n");
 	if (!pthread_create(&rtsp_thread, NULL, rec_StartPlay, this))
 	{
 		return 1;
@@ -434,25 +430,9 @@ int ipcam_rtsp_rec::StartRecv()
 int ipcam_rtsp_rec::Close()
 {
 	LOGD(   "ipcam_rtsp::Close(): Entering.\n");
-	// Set watchVariable to end doEventLoop
-	watchVariable = 10;
-	usleep(50000);
-	watchVariable = 10;
-	usleep(50000);
-	watchVariable = 10;
-	usleep(50000);
-	watchVariable = 10;
-
-	// Close RingBuf Sink:
-	CloseMediaSinks();
-
-	// Teardown, then shutdown, any outstanding RTP/RTCP subsessions
-	Medium::close(session);
-	Medium::close(rtspClient);
-
-	LOGD(   "ipcam_rtsp::Close(): Leaving.\n");
+	shutdownStream(rtspClient);
+	LOGD("ipcam_rtsp::Close(): Leaving.\n");
 	return 1;
-
 }
 
 void ipcam_rtsp_rec::CloseMediaSinks()
@@ -460,44 +440,27 @@ void ipcam_rtsp_rec::CloseMediaSinks()
 
 }
 
-
 void* rec_StartPlay(void* arg)
 {
-	ipcam_rtsp_rec *pSHRtspRx = (ipcam_rtsp_rec*)arg;
-	RTSPClient *rtspClient = (RTSPClient*)pSHRtspRx->rtspClient;
-	MediaSession* session = pSHRtspRx->session;
-	UsageEnvironment* env = pSHRtspRx->env;
+    ipcam_rtsp_rec *pSHRtspRx = (ipcam_rtsp_rec*)arg;
+    ourRTSPClient *rtspClient = (ourRTSPClient*)pSHRtspRx->rtspClient;
+    StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+    MediaSession* session = scs.session; // alias
+    UsageEnvironment* env = pSHRtspRx->env;
 
-	env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
-	return NULL;
-}
-
-void rec_subsessionAfterPlaying(void* clientData)
-{
-	fprintf(stderr,"+Enter %s",__func__);
-	// Begin by closing this media subsession's stream:
-	MediaSubsession* subsession = (MediaSubsession*)clientData;
-	Medium::close(subsession->sink);
-	subsession->sink = NULL;
-
-	// Next, check whether *all* subsessions' streams have now been closed:
-	MediaSession& session = subsession->parentSession();
-	MediaSubsessionIterator iter(session);
-	while ((subsession = iter.next()) != NULL)
-	{
-		if (subsession->sink != NULL)
-		{
-			return; // this subsession is still active
-		}
+    LOGI( "\t rec begins now\n");
+	rtspClient = ourRTSPClient::createNew(*env, "rtsp://ahlawat.servehttp.com/live.sdp", 0, "RTSPLayer", 0, "/mnt/sdcard/rec.mov");
+	if (rtspClient == NULL) {
+		LOGI("Failed to create a RTSP client for : %s \n" ,  env->getResultMsg() );
+		return NULL;
 	}
-	fprintf(stderr,"-Exit %s",__func__);
-}
 
-void rec_subsessionByeHandler(void* clientData)
-{
-	MediaSubsession* subsession = (MediaSubsession*)clientData;
-	// Act now as if the subsession had closed:
-	rec_subsessionAfterPlaying (subsession);
+	rtspClient->sendDescribeCommand(continueAfterDESCRIBE);
+    env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
+
+	LOGI( "\t checking program return\n");
+	shutdownStream(rtspClient);
+	return NULL;
 }
 
 

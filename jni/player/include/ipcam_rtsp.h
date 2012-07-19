@@ -1,4 +1,3 @@
-
 #ifndef _IPCAM_RTSP_H_
 #define _IPCAM_RTSP_H_
 
@@ -19,7 +18,6 @@ class ipcam_rtsp
 		unsigned short fVideoWidth;
 		unsigned fVideoFPS;
 		char* fCodecName;
-
 		char watchVariable;    ///< a flag to stop doEventLoop() set to nonzero will return from doEventLoop()
 
 	public:
@@ -108,6 +106,5 @@ public:
 	StreamClientState scs;
 	QuickTimeFileSink* qtOut;
 };
-
 
 #endif // _IPCAM_RTSP_H_

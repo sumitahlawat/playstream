@@ -17,9 +17,6 @@ ipcam_camera *MyIPCAM3 = NULL;
 ipcam_camera *MyIPCAM4 = NULL;
 
 static int errorCam1 = 0;
-static int errorCam2 = 0;
-static int errorCam3 = 0;
-static int errorCam4 = 0;
 
 ipcam_vdec *videoDecode1 = NULL;
 ipcam_vdec *videoDecode2 = NULL;
@@ -28,12 +25,12 @@ ipcam_vdec *videoDecode4 = NULL;
 
 void DisplayCb_1 (uint8_t* aData[], int aDataLen)
 {
-
+	LOGD("display frame data after callback");
 }
 
 void create_surfaces(int ID, int x, int y)
 {
-
+	LOGD("create some glsurface here using example from native player");
 }
 
 /*
@@ -59,15 +56,15 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 			MyIPCAM1->init();      // initialize ring buffers
 			MyIPCAM1->set_recFile(RecFile);
 
-			errorCam1 = MyIPCAM1->play_connect();
+//			errorCam1 = MyIPCAM1->play_connect();
 			MyIPCAM1->rec_connect();
 
 			//create FFMPEG Decoder
-			videoDecode1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
-			MyIPCAM1->pVDec = videoDecode1;
+//			videoDecode1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
+//			MyIPCAM1->pVDec = videoDecode1;
 
-			usleep (1000);
-			videoDecode1->InitMPEG4Dec();
+//			usleep (1000);
+//			videoDecode1->InitMPEG4Dec();
 
 			LOGD("IPCAM %d errorCam1 %d\n", ID, errorCam1);
 			break;
@@ -89,11 +86,10 @@ void  Java_my_streamplayer_Rtsplayer_StartRec
 	switch(ID)
 	{
 		case 1:
+			MyIPCAM1->start_recording();
 			if(errorCam1 == 1)
 			{
-				MyIPCAM1->start_playback();
-				MyIPCAM1->start_recording();
-				LOGD("IPCAM %d Recording\n", ID);
+//				MyIPCAM1->start_playback();
 			}
 			break;
 
@@ -115,7 +111,7 @@ void Java_my_streamplayer_Rtsplayer_StopRec
 	{
 		case 1:
 			MyIPCAM1->stop_recording();
-			MyIPCAM1->stop_playback();
+//			MyIPCAM1->stop_playback();
 			LOGD("IPCAM %d Recording Stopped\n", ID);
 			break;
 

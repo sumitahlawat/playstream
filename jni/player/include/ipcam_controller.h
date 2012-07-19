@@ -21,7 +21,6 @@ class ipcam_controller
         static void *StartIPCAMRx (void *arg);
 
     public:
-
 		ringbufferwriter* m_pRBufferAudioWriterRx; ///< Instance of Audio Ringbuffer Write for Rx
 		ringbufferwriter* m_pRBufferVideoWriterRx; ///< Instance of Audio Ringbuffer Writer for Rx
 
@@ -37,7 +36,6 @@ class ipcam_controller
 
         int CloseMedia ();
 		int CloseMedia_Rec ();
-
 };
 
 #endif //_IPCAM_CONTROLLER_H_

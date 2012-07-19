@@ -34,11 +34,9 @@ public:
 
 	int init();
 	void deinit();
-
 	int play_connect();
 	int rec_connect();
 	int disconnect();
-
 	int start_playback();
 	int stop_playback();
 	int start_recording();
@@ -59,6 +57,5 @@ public:
 	#define VIDEOBUFFER_SZ	2*1024*1024
 	#define AUDIOBUFFER_SZ	2*24*1024
 };
-
 
 #endif /* __ipcam_camera_H__ */

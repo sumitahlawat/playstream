@@ -38,7 +38,7 @@ ipcam_controller::~ipcam_controller ()
 int ipcam_controller::InitMedia (ringbufferwriter *pVideoWriter,
 								 ringbufferwriter *pAudioWriter)
 {
-    LOGI ("Enter InitMedia()\n");
+    LOGI ("Enter InitMedia Player \n");
 
 	m_pRBufferAudioWriterRx = pAudioWriter;
 	m_pRBufferVideoWriterRx = pVideoWriter;
@@ -55,7 +55,7 @@ int ipcam_controller::InitMedia (ringbufferwriter *pVideoWriter,
 int ipcam_controller::InitMedia (char* fname, int fps)
 {
 	this->filename = fname;
-	
+	LOGI("Init recorder \n");
 	if (IPCAM_rtsp_rec->Init(pRTSPUrl, filename, fps) != 1)
 	{
 		LOGI ("setupVideoCall:RTSP Rx Configuration failure\n");

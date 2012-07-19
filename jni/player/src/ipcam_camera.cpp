@@ -91,13 +91,11 @@ void ipcam_camera::deinit()
 
 int ipcam_camera::play_connect()
 {
-	//char filename[] = "/mnt/sdcard/qtcam.mp4";
 	return pIpCam->InitMedia (pVRBWriter, pARBWriter);
 }
 
 int ipcam_camera::rec_connect()
 {
-	//char filename[] = "/mnt/sdcard/qtcam.mp4";
 	return pIpCam->InitMedia (recfilename, fps);
 }
 
@@ -131,8 +129,6 @@ int ipcam_camera::stop_playback()
 void ipcam_camera::set_recFile(char* fname)
 {
 	recfilename = fname;
-
-	LOGD ("Enter %s for %s\n", __func__, recfilename);
 }
 
 int ipcam_camera::start_recording()
