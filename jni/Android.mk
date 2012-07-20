@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:= libBasicUsageEnvironment
 
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/BasicUsageEnvironment/include
-LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1
+LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1 -DANDROID
 
 #LOCAL_CFLAGS := -fno-rtti -fno-exceptions
 
@@ -24,7 +24,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:= libUsageEnvironment
 
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/BasicUsageEnvironment/include
-LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1
+LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1 -DANDROID
 #LOCAL_CFLAGS := -fno-rtti -fno-exceptions
 LOCAL_SRC_FILES := \
 		UsageEnvironment/UsageEnvironment.cpp \
@@ -38,7 +38,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:= libgroupsock
 
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/BasicUsageEnvironment/include
-LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1  -DNO_SSTREAM
+LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1  -DNO_SSTREAM -DANDROID
 	
 LOCAL_SRC_FILES := \
 		groupsock/IOHandlers.cpp \
@@ -59,8 +59,7 @@ LOCAL_MODULE:= libliveMedia
 
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/BasicUsageEnvironment/include $(LOCAL_PATH)/liveMedia/include
 
-
-LOCAL_CFLAGS :=  -DSOCKLEN_T=socklen_t -fexceptions -DLOCALE_NOT_USED -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1  
+LOCAL_CFLAGS :=  -DSOCKLEN_T=socklen_t -fexceptions -DDEBUG -DLOCALE_NOT_USED -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1 -DANDROID  
 
 LOCAL_SRC_FILES := \
 		liveMedia/AACAudioMatroskaFileServerMediaSubsession.cpp \

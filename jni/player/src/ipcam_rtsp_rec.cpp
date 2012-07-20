@@ -273,7 +273,7 @@ void shutdownStream(RTSPClient* rtspClient, int exitCode) {
 	int clientid=0;
 	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam1")!=NULL)	{
 		clientid=1;
-		//trec1->fEventLoopStopFlag = ~0;
+//		rtspClient->watchVariable = ~0;
 	}
 
 	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam2")!=NULL)	{
@@ -404,11 +404,11 @@ int ipcam_rtsp_rec::Init(char *url, char* fname, int fps)
 	watchVariable = 0;
 
 	this->filename = fname;
-//	rtspClient = ourRTSPClient::createNew(*env, url, verbosityLevel, applicationName, 0, fname);
-//	if (rtspClient == NULL) {
-//		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, fname,  env->getResultMsg() );
-//		return -1;
-//	}
+	rtspClient = ourRTSPClient::createNew(*env, url, verbosityLevel, applicationName, 0, fname);
+	if (rtspClient == NULL) {
+		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, fname,  env->getResultMsg() );
+		return -1;
+	}
 
 	LOGI( "ipcam_rtsp::Init_Rec(): Leaving.\n");
 	return 1;
@@ -430,7 +430,9 @@ int ipcam_rtsp_rec::StartRecv()
 int ipcam_rtsp_rec::Close()
 {
 	LOGD(   "ipcam_rtsp::Close(): Entering.\n");
-	shutdownStream(rtspClient);
+	usleep(10);
+	watchVariable = ~0;
+
 	LOGD("ipcam_rtsp::Close(): Leaving.\n");
 	return 1;
 }
@@ -449,7 +451,7 @@ void* rec_StartPlay(void* arg)
     UsageEnvironment* env = pSHRtspRx->env;
 
     LOGI( "\t rec begins now\n");
-	rtspClient = ourRTSPClient::createNew(*env, "rtsp://ahlawat.servehttp.com/live.sdp", 0, "RTSPLayer", 0, "/mnt/sdcard/rec.mov");
+	//rtspClient = ourRTSPClient::createNew(*env, "rtsp://ahlawat.servehttp.com/live.sdp", 0, "RTSPLayer", 0, "/mnt/sdcard/rec.mov");
 	if (rtspClient == NULL) {
 		LOGI("Failed to create a RTSP client for : %s \n" ,  env->getResultMsg() );
 		return NULL;
