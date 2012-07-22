@@ -23,8 +23,18 @@
             android:layout_width="106dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="start"
+            android:text="record"
             android:textSize="20sp" />
+        
+        <Button
+            android:id="@+id/button4"
+            android:layout_marginLeft="50dp"
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="play"
+            android:textSize="20sp" />
+        
     </LinearLayout>
 
     <EditText

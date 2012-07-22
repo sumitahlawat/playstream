@@ -76,7 +76,7 @@ void continueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* resultS
 		}
 
 		char* sdpDescription = resultString;
-		LOGI("Got a SDP description: \n %s \n", sdpDescription);
+//		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
 		// Create a media session object from this SDP description:
 		scs.session = MediaSession::createNew(env, sdpDescription);
@@ -437,10 +437,6 @@ int ipcam_rtsp_rec::Close()
 	return 1;
 }
 
-void ipcam_rtsp_rec::CloseMediaSinks()
-{
-
-}
 
 void* rec_StartPlay(void* arg)
 {

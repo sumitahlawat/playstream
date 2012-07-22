@@ -19,7 +19,7 @@ ipcam_controller::ipcam_controller (char* URL)
 {
     LOGI ("Contruct IPCAM control engine\n");
 
-    IPCAM_rtsp = new ipcam_rtsp_play();
+    IPCAM_rtsp_play = new ipcam_rtsp_play();
 	IPCAM_rtsp_rec = new ipcam_rtsp_rec();
 
     pRTSPUrl = URL;
@@ -38,17 +38,16 @@ ipcam_controller::~ipcam_controller ()
 int ipcam_controller::InitMedia (ringbufferwriter *pVideoWriter,
 								 ringbufferwriter *pAudioWriter)
 {
-    LOGI ("Enter InitMedia Player \n");
+    LOGI ("Enter ipcam_controller::InitMedia Player \n");
 
 	m_pRBufferAudioWriterRx = pAudioWriter;
 	m_pRBufferVideoWriterRx = pVideoWriter;
 
-	if (IPCAM_rtsp->Init(pRTSPUrl, m_pRBufferVideoWriterRx, m_pRBufferAudioWriterRx) != 1)
+	if (IPCAM_rtsp_play->Init(pRTSPUrl, m_pRBufferVideoWriterRx, m_pRBufferAudioWriterRx) != 1)
     {
         LOGI ("setupVideoCall:RTSP Rx Configuration failure\n");
         return -1;
     }
-    LOGI ("IPCAM%d InitMedia() completed\n", bAdapt);
     return 1;
 }
 
@@ -67,7 +66,7 @@ int ipcam_controller::InitMedia (char* fname, int fps)
 int ipcam_controller::StartMedia ()
 {
     LOGI ("Enter StartMedia()\n");
-    IPCAM_rtsp->StartRecv();
+    IPCAM_rtsp_play->StartRecv();
     LOGI ("StartMedia() completed\n");
     return 1;
 }
@@ -81,7 +80,7 @@ int ipcam_controller::StartMedia_Rec()
 int ipcam_controller::CloseMedia ()
 {
     LOGI ("Enter CloseMedia()\n");
-    IPCAM_rtsp->Close();
+    IPCAM_rtsp_play->Close();
     LOGI ( "CloseMedia() completed\n");
     return 1;
 }

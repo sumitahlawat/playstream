@@ -17,8 +17,8 @@
 
 #ifndef mmioFOURCC
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )				\
-	( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |	\
-	( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
+		( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |	\
+				( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
 #endif
 
 void subsessionAfterPlaying(void* clientData);
@@ -48,6 +48,7 @@ void playshutdownStream(RTSPClient* rtspClient, int exitCode = 1);
 void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* resultString) {
 	do {
 		UsageEnvironment& env = rtspClient->envir(); // alias
+		StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
 
 		if (resultCode != 0) {
 			LOGI("Failed to get a SDP description: %s \n", resultString);
@@ -55,8 +56,23 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 		}
 
 		char* sdpDescription = resultString;
-		LOGI("Got a SDP description: \n %s \n", sdpDescription);
+		//		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
+		// Create a media session object from this SDP description:
+		scs.session = MediaSession::createNew(env, sdpDescription);
+		delete[] sdpDescription; // because we don't need it anymore
+		if (scs.session == NULL) {
+			LOGI( "Failed to create a MediaSession object from the SDP description: %s \n" ,env.getResultMsg());
+			break;
+		} else if (!scs.session->hasSubsessions()) {
+			LOGI("This session has no media subsessions (i.e., no \"m=\" lines)\n");
+			break;
+		}
+
+		// Then, create and set up our data source objects for the session.  We do this by iterating over the session's 'subsessions',
+		// calling "MediaSubsession::initiate()", and then sending a RTSP "SETUP" command, on each one.
+		// (Each 'subsession' will have its own data source.)
+		scs.iter = new MediaSubsessionIterator(*scs.session);
 		playsetupNextSubsession(rtspClient);
 		return;
 	} while (0);
@@ -67,7 +83,7 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 
 void playsetupNextSubsession(RTSPClient* rtspClient) {
 	UsageEnvironment& env = rtspClient->envir(); // alias
-	StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+	StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
 
 	scs.subsession = scs.iter->next();
 	if (scs.subsession != NULL) {
@@ -91,7 +107,7 @@ void playsetupNextSubsession(RTSPClient* rtspClient) {
 void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* resultString) {
 	do {
 		UsageEnvironment& env = rtspClient->envir(); // alias
-		StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+		StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
 
 		if (resultCode != 0) {
 			LOGI("failed to setup subsession \n");
@@ -99,7 +115,78 @@ void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* result
 			break;
 		}
 
-		LOGI("Set up the subsession : before sink create : %s\n",((ourRTSPClient*)rtspClient)->fname);
+		LOGI("Set up the subsession : before sink create : \n");
+
+		while ((subsession = iter.next ()) != NULL)
+		{
+			if (subsession->readSource () == NULL)
+			{
+				continue; // was not initiated
+			}
+
+			ipcam_ringsink* ringBufSink = NULL;
+			if (strcmp(subsession->mediumName(), "video") == 0)
+			{
+				ringBufSink = ipcam_ringsink::createNew(*env, pVideoBuffer, fileSinkBufferSize);
+				if(!ringBufSink) {
+					LOGE( "ringBufSink is NULL --- Check this\n");
+					exit(1);
+				}
+				fVideoHeight = subsession->videoHeight();
+				if(fVideoHeight == 0){
+					fVideoHeight = 240;
+					//fprintf(stderr, "fVideoHeight guessed %d\n", fVideoHeight);
+				}
+				fVideoWidth = subsession->videoWidth();
+				if(fVideoWidth == 0){
+					fVideoWidth = 320;
+					//fprintf(stderr, "fVideoWidth guessed %d\n", fVideoWidth);
+				}
+				fVideoFPS = subsession->videoFPS();
+				if(fVideoFPS == 0) {
+					fVideoFPS = 15;
+					//fprintf(stderr, "FPS guessed %d\n", fVideoFPS);
+				}
+				fCodecName = (char*) subsession->codecName();
+
+				LOGV("Video Details: Size: %dx%d, FPS: %d, Codec:%s \n",
+						fVideoWidth, fVideoHeight, fVideoFPS, fCodecName);
+			}
+			else if (strcmp(subsession->mediumName(), "audio") == 0)
+			{
+				ringBufSink = ipcam_ringsink::createNew(*env, pAudioBuffer, fileSinkBufferSize);
+			}
+
+			subsession->sink = ringBufSink;
+			if (subsession->sink == NULL)
+			{
+				LOGE ("Failed to create ipcam_ringsink for \"%s\": %s\n",
+						subsession->mediumName(),env->getResultMsg());
+			}
+			else
+			{
+				if(strcmp(subsession->codecName(), "MP4V-ES") == 0 &&
+						subsession->fmtp_config() != NULL) {
+					// For MPEG-4 video RTP streams, the 'config' information
+					// from the SDP description contains useful VOL etc. headers.
+					// Insert this data at the front of the output file:
+					unsigned configLen;
+					unsigned char* configData
+					= parseGeneralConfigStr(subsession->fmtp_config(), configLen);
+					struct timeval timeNow;
+					gettimeofday(&timeNow, NULL);
+					ringBufSink->addData(configData, configLen, timeNow);
+					delete[] configData;
+				}
+				subsession->sink->startPlaying(*(subsession->readSource()),
+						subsessionAfterPlaying, subsession);
+
+				if (subsession->rtcpInstance() != NULL)
+				{
+					subsession->rtcpInstance()->setByeHandler(subsessionByeHandler, subsession);
+				}
+			}
+		}
 
 
 		// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
@@ -184,27 +271,9 @@ void playstreamTimerHandler(void* clientData) {
 
 void playshutdownStream(RTSPClient* rtspClient, int exitCode) {
 	UsageEnvironment& env = rtspClient->envir(); // alias
-	StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+	StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
 	int clientid=0;
-	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam1")!=NULL)	{
-		clientid=1;
-		//trec1->fEventLoopStopFlag = ~0;
-	}
 
-	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam2")!=NULL)	{
-		clientid=2;
-		//trec2->fEventLoopStopFlag = ~0;
-	}
-
-	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam3")!=NULL) {
-		clientid=3;
-		//trec3->fEventLoopStopFlag = ~0;
-	}
-
-	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam4")!=NULL) {
-		clientid=4;
-		//trec4->fEventLoopStopFlag = ~0;
-	}
 	// First, check whether any subsessions have still to be closed:
 	if (scs.session != NULL) {
 		Boolean someSubsessionsWereActive = False;
@@ -232,7 +301,6 @@ void playshutdownStream(RTSPClient* rtspClient, int exitCode) {
 	}
 
 	LOGI( "Closing the stream :%d.\n",clientid);
-	Medium::close(((ourRTSPClient*)rtspClient)->qtOut);
 	// Note that this will also cause this stream's "StreamClientState" structure to get reclaimed.
 
 
@@ -250,11 +318,11 @@ void playshutdownStream(RTSPClient* rtspClient, int exitCode) {
 
 ipcam_rtsp_play::ipcam_rtsp_play()
 {
-    TaskScheduler* scheduler = BasicTaskScheduler::createNew();
-    env = BasicUsageEnvironment::createNew(*scheduler);
-    rtspClient = NULL;
+	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
+	env = BasicUsageEnvironment::createNew(*scheduler);
+	rtspClient = NULL;
 
-    watchVariable = 0;
+	watchVariable = 0;
 }
 
 ipcam_rtsp_play::~ipcam_rtsp_play()
@@ -263,77 +331,89 @@ ipcam_rtsp_play::~ipcam_rtsp_play()
 }
 
 int ipcam_rtsp_play::Init(char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
-					 ringbufferwriter *pCodecHRtspAudioBuffer)
+		ringbufferwriter *pCodecHRtspAudioBuffer)
 {
-    LOGI ("ipcam_rtsp::Init(): Entering. \n");
+	LOGI ("ipcam_rtsp::Init(): Entering. \n");
 	pVideoBuffer = pCodecHRtspVideoBuffer;
 	pAudioBuffer = pCodecHRtspAudioBuffer;
-    char const* applicationName = "RTSPlayer";
-    unsigned char verbosityLevel = 0;
-    portNumBits tunnelOverHTTPPortNum = 0;
-    int simpleRTPoffsetArg = -1;
+	char const* applicationName = "RTSPlayer";
+	unsigned char verbosityLevel = 0;
+	portNumBits tunnelOverHTTPPortNum = 0;
+	int simpleRTPoffsetArg = -1;
 
-    watchVariable = 0;
+	watchVariable = 0;
 
 
-	rtspClient = RTSPClient::createNew(*env,url, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
-	//rtspClient = ourRTSPClient::createNew(*env, url, verbosityLevel, applicationName, 0, NULL);
+	rtspClient = playRTSPClient::createNew(*env,url, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
 	if (rtspClient == NULL) {
 		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, env->getResultMsg() );
 		return -1;
 	}
 
-    LOGI ("ipcam_rtsp::Init(): Next  \n");
-	rtspClient->sendDescribeCommand(playcontinueAfterDESCRIBE);
-    return 1;
+	LOGI ("ipcam_rtsp::Init(): done  \n");
+	return 1;
 }
 
 int ipcam_rtsp_play::StartRecv()
 {
+	LOGI( "ipcam_rtsp_play : play thread start\n");
 	if (!pthread_create(&rtsp_thread, NULL, StartPlay, this))
-    {
-        return 1;
-    }
-    else
-    {
-        return -1;
-    }
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 int ipcam_rtsp_play::Close()
 {
-	LOGD(   "ipcam_rtsp::Close(): Entering.\n");
-    // Set watchVariable to end doEventLoop
-    watchVariable = 10;
-    usleep(50000);
-    watchVariable = 10;
-    usleep(50000);
-    watchVariable = 10;
-    usleep(50000);
-    watchVariable = 10;
+	LOGD(   "ipcam_rtsp_play::Close(): Entering.\n");
+	usleep(10);
+	watchVariable = ~0;
 
-    // Close RingBuf Sink:
-    CloseMediaSinks();
-
-//    Medium::close(session);
-//    Medium::close(rtspClient);
-
-	LOGD(   "ipcam_rtsp::Close(): Leaving.\n");
-    return 1;
-}
-
-void ipcam_rtsp_play::CloseMediaSinks()
-{
-    
+	LOGD("ipcam_rtsp_play::Close(): Leaving.\n");
+	return 1;
 }
 
 void* StartPlay(void* arg)
 {
-    ipcam_rtsp_play *pSHRtspRx = (ipcam_rtsp_play*)arg;
-    RTSPClient *rtspClient = (RTSPClient*)pSHRtspRx->rtspClient;
-    UsageEnvironment* env = pSHRtspRx->env;
+	ipcam_rtsp_play *pSHRtspRx = (ipcam_rtsp_play*)arg;
+	playRTSPClient *rtspClient = (playRTSPClient*)pSHRtspRx->rtspClient;
+	StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
+	MediaSession* session = scs.session; // alias
+	UsageEnvironment* env = pSHRtspRx->env;
 
-    env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
+	LOGI( "\t play begins now\n");
 
-    return NULL;
+	if (rtspClient == NULL) {
+		LOGI("Failed to create a RTSP client for : %s \n" ,  env->getResultMsg() );
+		return NULL;
+	}
+
+	rtspClient->sendDescribeCommand(playcontinueAfterDESCRIBE);
+	env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
+
+	LOGI( "\t checking program return\n");
+	playshutdownStream(rtspClient);
+
+	return NULL;
+}
+
+// Implementation of "playRTSPClient":
+playRTSPClient* playRTSPClient::createNew(UsageEnvironment& env, char const* rtspURL,
+		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum) {
+	return new playRTSPClient(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
+}
+
+playRTSPClient::playRTSPClient(UsageEnvironment& env, char const* rtspURL,
+		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum)
+: RTSPClient(env,rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum) {
+	LOGI( "playRTSPClient created\n");
+}
+
+playRTSPClient::~playRTSPClient()
+{
+	LOGI("~playRTSPClient ");
 }

@@ -10,6 +10,7 @@
 //#include <utils/threads.h>
 class StreamClientState;
 class ourRTSPClient;
+class playRTSPClient;
 
 class ipcam_rtsp
 {
@@ -21,7 +22,6 @@ class ipcam_rtsp
 		char watchVariable;    ///< a flag to stop doEventLoop() set to nonzero will return from doEventLoop()
 
 	public:
-		virtual void CloseMediaSinks ()=0;
 		virtual int StartRecv ()=0;
 		virtual int Close ()=0;
 
@@ -37,25 +37,6 @@ class ipcam_rtsp
 		UsageEnvironment* env; ///< Specify the environment parameters
 };
 
-class ipcam_rtsp_play :  public ipcam_rtsp
-{
-    private:
-		ringbufferwriter *pVideoBuffer; ///< video buffer to save the received depacketized video stream
-		ringbufferwriter *pAudioBuffer; ///< audio buffer to save the received depacketized audio stream
-
-    public:
-		void CloseMediaSinks ();
-		int StartRecv ();
-		int Close ();
-		
-		ipcam_rtsp_play ();
-		~ipcam_rtsp_play ();
-		RTSPClient* rtspClient;
-		int Init (char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
-					ringbufferwriter *pCodecHRtspAudioBuffer);
-
-};
-
 class ipcam_rtsp_rec :  public ipcam_rtsp
 {
 	public:
@@ -63,7 +44,6 @@ class ipcam_rtsp_rec :  public ipcam_rtsp
 		int fps;
 		
 	public:
-		void CloseMediaSinks ();
 		int StartRecv ();
 		int Close ();
 		
@@ -71,6 +51,24 @@ class ipcam_rtsp_rec :  public ipcam_rtsp
 		ourRTSPClient* rtspClient;
 		ipcam_rtsp_rec ();
 		~ipcam_rtsp_rec ();
+};
+
+
+class ipcam_rtsp_play :  public ipcam_rtsp
+{
+    private:
+		ringbufferwriter *pVideoBuffer; ///< video buffer to save the received depacketized video stream
+		ringbufferwriter *pAudioBuffer; ///< audio buffer to save the received depacketized audio stream
+
+    public:
+		int StartRecv ();
+		int Close ();
+
+		playRTSPClient* rtspClient;
+		int Init (char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
+					ringbufferwriter *pCodecHRtspAudioBuffer);
+		ipcam_rtsp_play ();
+		~ipcam_rtsp_play ();
 };
 
 // Define a class to hold per-stream state that we maintain throughout each stream's lifetime:
@@ -85,6 +83,23 @@ public:
 	MediaSubsession* subsession;
 	TaskToken streamTimerTask;
 	double duration;
+};
+
+class playRTSPClient: public RTSPClient {
+public:
+	static playRTSPClient* createNew(UsageEnvironment& env, char const* rtspURL,
+			int verbosityLevel = 0,
+			char const* applicationName = NULL,
+			portNumBits tunnelOverHTTPPortNum = 0 );
+
+protected:
+	playRTSPClient(UsageEnvironment& env, char const* rtspURL,
+			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum);
+	// called only by createNew();
+	virtual ~playRTSPClient();
+
+public:
+	StreamClientState scs;
 };
 
 class ourRTSPClient: public RTSPClient {
