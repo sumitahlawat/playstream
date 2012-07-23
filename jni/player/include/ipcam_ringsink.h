@@ -6,6 +6,7 @@
 #include "MediaSink.hh"
 #endif
 
+#include "player.h"
 #include "ipcam_ringbuf.h"
 
 class ipcam_ringsink: public MediaSink

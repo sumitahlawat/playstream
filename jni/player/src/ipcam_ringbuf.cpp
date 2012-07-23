@@ -14,12 +14,13 @@
 
 #include "ipcam_ringbuf.h"
 #include <stdio.h>
+#include "player.h"
 
 const unsigned MAX_UNREAD_DATA = 100;
 
 ringbuffer::ringbuffer (unsigned int buffer_space)
 {
-    fprintf (stderr, "Construct ringbuffer ()\n");
+    LOGI ("Construct ringbuffer ()\n");
     m_iBufferSpace = buffer_space;
     m_pBuffer = NULL;
     m_iBufferHead = 0;
@@ -36,18 +37,18 @@ ringbuffer::ringbuffer (unsigned int buffer_space)
 
     if (pthread_mutex_init(&m_Lists, NULL) != 0)
 	{
-    	fprintf(stderr, "\n mutex init failed\n");
+    	LOGI("\n mutex init failed\n");
 	}
 
     if (pthread_mutex_init(&m_Head, NULL) != 0)
     {
-       	fprintf(stderr, "\n mutex init failed\n");
+       	LOGI("\n mutex init failed\n");
     }
 }
 
 ringbuffer::~ringbuffer ()
 {
-    fprintf (stderr, "DeConstruct ringbuffer ()\n");
+    LOGI ( "DeConstruct ringbuffer ()\n");
     pthread_mutex_destroy(&m_Lists);
     pthread_mutex_destroy(&m_Head);
     if(m_pBuffer != NULL)
@@ -237,17 +238,18 @@ ringbufferwriter::ringbufferwriter (ringbuffer *ring)
 {
     m_pRing = ring;
     m_pRing->AttachWriter(this);
-    fprintf (stderr, "Construct ringbufferwriter ()\n");
+    LOGI ( "Construct ringbufferwriter ()\n");
 }
 
 ringbufferwriter::~ringbufferwriter ()
 {
-    fprintf (stderr, "DeConstruct ringbufferwriter ()\n");
+    LOGI ( "DeConstruct ringbufferwriter ()\n");
     m_pRing->DetachWriter(this);
 }
 
 int ringbufferwriter::WriteToBuffer (unsigned char *data, int len, bool must_fit) const
 {
+	LOGI ( "ringbufferwriter::WriteToBuffer %d\n", len);
 	int status = m_pRing->AddToBuffer(data, len, must_fit);
     return status;
 }
@@ -277,12 +279,12 @@ ringbufferreader::ringbufferreader (ringbuffer *ring)
     ReaderVector.clear();
     m_pRing->AttachReader(this);
     m_queued = false;
-    fprintf (stderr, "Construct ringbufferreader ()\n");
+    LOGI ( "Construct ringbufferreader ()\n");
 }
 
 ringbufferreader::~ringbufferreader ()
 {
-    fprintf (stderr, "DeConstruct ringbufferreader ()\n");
+    LOGI ( "DeConstruct ringbufferreader ()\n");
     m_pRing->DetachReader(this);
 }
 

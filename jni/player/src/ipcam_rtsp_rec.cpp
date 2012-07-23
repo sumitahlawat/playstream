@@ -28,9 +28,6 @@ TaskToken interPacketGapCheckTimerTask = NULL;
 unsigned interPacketGapMaxTime = 10;
 unsigned totNumPacketsReceived = ~0; // used if checking inter-packet gaps
 
-
-void rec_subsessionAfterPlaying(void* clientData);
-void rec_subsessionByeHandler(void* clientData);
 void* rec_StartPlay(void* arg);
 
 // Forward function definitions:
@@ -76,7 +73,7 @@ void continueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* resultS
 		}
 
 		char* sdpDescription = resultString;
-//		LOGI("Got a SDP description: \n %s \n", sdpDescription);
+		//		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
 		// Create a media session object from this SDP description:
 		scs.session = MediaSession::createNew(env, sdpDescription);
@@ -112,11 +109,13 @@ void setupNextSubsession(RTSPClient* rtspClient) {
 			env << *rtspClient << "Failed to initiate the \"" << *scs.subsession << "\" subsession: " << env.getResultMsg() << "\n";
 			setupNextSubsession(rtspClient); // give up on this subsession; go to the next one
 		} else {
-			LOGI("subsession initiated : %d  \n",  scs.subsession->clientPortNum());
+			LOGI("subsession initiated port: %d  \n",  scs.subsession->clientPortNum());
+			LOGI("subsession initiated medium: %s  \n",  scs.subsession->mediumName());
 			env << *rtspClient << "Initiated the \"" << *scs.subsession
 					<< "\" subsession (client ports " << scs.subsession->clientPortNum() << "-" << scs.subsession->clientPortNum()+1 << ")\n";
 
-			// Continue setting up this subsession, by sending a RTSP "SETUP" command:
+			// Continue setting up this subsession, by sending a RTSP "SETUP" command:  only for video subsession
+			//if (strcmp(scs.subsession->mediumName(), "video") == 0)
 			rtspClient->sendSetupCommand(*scs.subsession, continueAfterSETUP);
 		}
 		return;
@@ -273,7 +272,7 @@ void shutdownStream(RTSPClient* rtspClient, int exitCode) {
 	int clientid=0;
 	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam1")!=NULL)	{
 		clientid=1;
-//		rtspClient->watchVariable = ~0;
+		//		rtspClient->watchVariable = ~0;
 	}
 
 	if (strstr(((ourRTSPClient*)rtspClient)->fname,"ipcam2")!=NULL)	{
@@ -440,13 +439,13 @@ int ipcam_rtsp_rec::Close()
 
 void* rec_StartPlay(void* arg)
 {
-    ipcam_rtsp_rec *pSHRtspRx = (ipcam_rtsp_rec*)arg;
-    ourRTSPClient *rtspClient = (ourRTSPClient*)pSHRtspRx->rtspClient;
-    StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
-    MediaSession* session = scs.session; // alias
-    UsageEnvironment* env = pSHRtspRx->env;
+	ipcam_rtsp_rec *pSHRtspRx = (ipcam_rtsp_rec*)arg;
+	ourRTSPClient *rtspClient = (ourRTSPClient*)pSHRtspRx->rtspClient;
+	StreamClientState& scs = ((ourRTSPClient*)rtspClient)->scs; // alias
+	MediaSession* session = scs.session; // alias
+	UsageEnvironment* env = pSHRtspRx->env;
 
-    LOGI( "\t rec begins now\n");
+	LOGI( "\t rec begins now\n");
 	//rtspClient = ourRTSPClient::createNew(*env, "rtsp://ahlawat.servehttp.com/live.sdp", 0, "RTSPLayer", 0, "/mnt/sdcard/rec.mov");
 	if (rtspClient == NULL) {
 		LOGI("Failed to create a RTSP client for : %s \n" ,  env->getResultMsg() );
@@ -454,7 +453,7 @@ void* rec_StartPlay(void* arg)
 	}
 
 	rtspClient->sendDescribeCommand(continueAfterDESCRIBE);
-    env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
+	env->taskScheduler().doEventLoop(&(pSHRtspRx->watchVariable)); // does not return
 
 	LOGI( "\t checking program return\n");
 	shutdownStream(rtspClient);

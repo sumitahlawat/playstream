@@ -32,16 +32,15 @@ public class PlaystreamActivity extends Activity {
 
 		Log.v("Playstream", "height = "+ display.getHeight());
 		Log.v("Playstream", "width = "+ display.getWidth());     
-
+		
 		url_text = (EditText) findViewById(R.id.editText1);        
 		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
 		final Rtsplayer player = new Rtsplayer();
-
+ 
 		btn_start = (Button) findViewById(R.id.button1);				
 		btn_start.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_start.setEnabled(false);
-
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
 				player.CreateRec(url, recfile, 1, 10, 10, 30);

@@ -20,6 +20,7 @@ ipcam_ringsink::ipcam_ringsink (UsageEnvironment& env,
 								unsigned bufferSize) :
 								MediaSink(env), fBufferSize(bufferSize)
 {
+	LOGI("ipcam_ringsink \n");
     fBuffer = new unsigned char[bufferSize];
     pBuffer = pBufferWriter;
     memset((void*)&initTime,0x0,sizeof(timeval));
@@ -52,7 +53,7 @@ Boolean ipcam_ringsink::continuePlaying ()
     fSource->getNextFrame (fBuffer, fBufferSize, afterGettingFrame, this,
 										  onSourceClosure, this);
 
-	//fprintf(stderr, "^^^^fSource FrameSize %d\n", fSource->fFrameSize);
+	LOGI("^^^^fSource \n");
     return True;
 }
 
@@ -68,8 +69,8 @@ void ipcam_ringsink::afterGettingFrame (void* clientData, unsigned frameSize,
 void ipcam_ringsink::addData (unsigned char* data, unsigned dataSize,
 										  struct timeval presentationTime)
 {
+	LOGI ("ipcam_ringsink::addData  ,,  dataSize = %d spaceleft :%d \n", dataSize ,pBuffer->SpaceLeft ());
     struct timeval tval =  presentationTime;
-
     if (initTime.tv_sec == 0 && initTime.tv_usec == 0)
     {
         initTime = presentationTime;
@@ -77,8 +78,7 @@ void ipcam_ringsink::addData (unsigned char* data, unsigned dataSize,
 
     if (pBuffer->SpaceLeft () < dataSize)
     {
-        fprintf (stderr, "dataSize = %d, spaceleft = %d\n", dataSize,
-				 pBuffer->SpaceLeft ());
+        LOGI ("dataSize = %d, spaceleft = %d\n", dataSize, pBuffer->SpaceLeft ());
         pBuffer-> Flush ();
     }
 

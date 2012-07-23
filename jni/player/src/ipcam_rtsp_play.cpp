@@ -15,14 +15,7 @@
 #include "ipcam_rtsp.h"
 #include "player.h"
 
-#ifndef mmioFOURCC
-#define mmioFOURCC( ch0, ch1, ch2, ch3 )				\
-		( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |	\
-				( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
-#endif
 
-void subsessionAfterPlaying(void* clientData);
-void subsessionByeHandler(void* clientData);
 void* StartPlay(void* arg);
 
 
@@ -30,7 +23,7 @@ void* StartPlay(void* arg);
 void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* resultString);
 void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* resultString);
 void playcontinueAfterPLAY(RTSPClient* rtspClient, int resultCode, char* resultString);
-void playrecsubsessionAfterPlaying(void* clientData); // called when a stream's subsession (e.g., audio or video substream) ends
+void playsubsessionAfterPlaying(void* clientData); // called when a stream's subsession (e.g., audio or video substream) ends
 void playsessionAfterPlaying(void* clientData = NULL);
 
 void playsubsessionByeHandler(void* clientData); // called when a RTCP "BYE" is received for a subsession
@@ -56,7 +49,7 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 		}
 
 		char* sdpDescription = resultString;
-		//		LOGI("Got a SDP description: \n %s \n", sdpDescription);
+		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
 		// Create a media session object from this SDP description:
 		scs.session = MediaSession::createNew(env, sdpDescription);
@@ -91,10 +84,12 @@ void playsetupNextSubsession(RTSPClient* rtspClient) {
 			LOGI("Failed to initiate the subsession : %s  \n",  env.getResultMsg() );
 			playsetupNextSubsession(rtspClient); // give up on this subsession; go to the next one
 		} else {
-			LOGI("subsession initiated : %d  - %d\n",  scs.subsession->clientPortNum() , scs.subsession->clientPortNum()+1);
-
+			LOGI("subsession initiated : %d  - %d codec :  %s\n",  scs.subsession->clientPortNum() , scs.subsession->clientPortNum()+1 , scs.subsession->codecName());
+			LOGI(" subsession info : %s  \n",  scs.subsession->mediumName() );
 			// Continue setting up this subsession, by sending a RTSP "SETUP" command:
+			//	if (strcmp(scs.subsession->mediumName(), "video") == 0)
 			rtspClient->sendSetupCommand(*scs.subsession, playcontinueAfterSETUP);
+
 		}
 		return;
 	}
@@ -109,91 +104,142 @@ void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* result
 		UsageEnvironment& env = rtspClient->envir(); // alias
 		StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
 
+		unsigned short fVideoHeight;
+		unsigned short fVideoWidth;
+		unsigned fVideoFPS;
+		char* fCodecName;
+		unsigned fileSinkBufferSize = 100000;
+
 		if (resultCode != 0) {
 			LOGI("failed to setup subsession \n");
 			//env << *rtspClient << "Failed to set up the \"" << *scs.subsession << "\" subsession: " << env.getResultMsg() << "\n";
 			break;
 		}
 
-		LOGI("Set up the subsession : before sink create : \n");
+		LOGI("Set up the subsession : before sink create \n");
+		ipcam_ringsink* ringBufSink = NULL;
+		ringBufSink = ipcam_ringsink::createNew(env, ((playRTSPClient*)rtspClient)->vbuffer, fileSinkBufferSize);
+		if(!ringBufSink) {
+			LOGI( "ringBufSink is NULL --- Check this\n");
+			exit(1);
+		}
+		fVideoHeight = scs.subsession->videoHeight();
+		if(fVideoHeight == 0){
+			fVideoHeight = 240;
+		}
+		fVideoWidth = scs.subsession->videoWidth();
+		if(fVideoWidth == 0){
+			fVideoWidth = 320;
+		}
+		fVideoFPS = scs.subsession->videoFPS();
+		if(fVideoFPS == 0) {
+			fVideoFPS = 15;
+		}
+		fCodecName = (char*) scs.subsession->codecName();
 
-		while ((subsession = iter.next ()) != NULL)
+		LOGI("Video Details: Size: %dx%d, FPS: %d, Codec:%s \n",
+				fVideoWidth, fVideoHeight, fVideoFPS, fCodecName);
+
+		scs.subsession->sink = ringBufSink;
+		if (scs.subsession->sink == NULL)
 		{
-			if (subsession->readSource () == NULL)
+			LOGI ("Failed to create ipcam_ringsink for \"%s\": %s\n",
+					scs.subsession->mediumName(),env.getResultMsg());
+		}
+		else
+		{
+			if(strcmp(scs.subsession->codecName(), "MP4V-ES") == 0 &&
+					scs.subsession->fmtp_config() != NULL) {
+				// For MPEG-4 video RTP streams, the 'config' information
+				// from the SDP description contains useful VOL etc. headers.
+				// Insert this data at the front of the output file:
+				LOGI( "add mp4v data to ringbuf\n");
+				unsigned configLen;
+				unsigned char* configData
+				= parseGeneralConfigStr(scs.subsession->fmtp_config(), configLen);
+				struct timeval timeNow;
+				gettimeofday(&timeNow, NULL);
+				ringBufSink->addData(configData, configLen, timeNow);
+				LOGI("Video Details configData : %s \n", configData);
+				delete[] configData;
+			}
+			scs.subsession->sink->startPlaying(*(scs.subsession->readSource()), playsubsessionAfterPlaying, scs.subsession);
+
+			// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
+			if (scs.subsession->rtcpInstance() != NULL) {
+				scs.subsession->rtcpInstance()->setByeHandler(playsubsessionByeHandler, scs.subsession);
+			}
+		}
+
+		/*
+		while ((scs.subsession = scs.iter->next ()) != NULL)
+		{
+			if (scs.subsession->readSource () == NULL)
 			{
 				continue; // was not initiated
 			}
 
 			ipcam_ringsink* ringBufSink = NULL;
-			if (strcmp(subsession->mediumName(), "video") == 0)
+			if (strcmp(scs.subsession->mediumName(), "video") == 0)
 			{
-				ringBufSink = ipcam_ringsink::createNew(*env, pVideoBuffer, fileSinkBufferSize);
+				ringBufSink = ipcam_ringsink::createNew(env, ((playRTSPClient*)rtspClient)->vbuffer, fileSinkBufferSize);
 				if(!ringBufSink) {
 					LOGE( "ringBufSink is NULL --- Check this\n");
 					exit(1);
 				}
-				fVideoHeight = subsession->videoHeight();
+				fVideoHeight = scs.subsession->videoHeight();
 				if(fVideoHeight == 0){
 					fVideoHeight = 240;
-					//fprintf(stderr, "fVideoHeight guessed %d\n", fVideoHeight);
 				}
-				fVideoWidth = subsession->videoWidth();
+				fVideoWidth = scs.subsession->videoWidth();
 				if(fVideoWidth == 0){
 					fVideoWidth = 320;
-					//fprintf(stderr, "fVideoWidth guessed %d\n", fVideoWidth);
 				}
-				fVideoFPS = subsession->videoFPS();
+				fVideoFPS = scs.subsession->videoFPS();
 				if(fVideoFPS == 0) {
 					fVideoFPS = 15;
-					//fprintf(stderr, "FPS guessed %d\n", fVideoFPS);
 				}
-				fCodecName = (char*) subsession->codecName();
+				fCodecName = (char*) scs.subsession->codecName();
 
-				LOGV("Video Details: Size: %dx%d, FPS: %d, Codec:%s \n",
+				LOGI("Video Details: Size: %dx%d, FPS: %d, Codec:%s \n",
 						fVideoWidth, fVideoHeight, fVideoFPS, fCodecName);
 			}
-			else if (strcmp(subsession->mediumName(), "audio") == 0)
+			else if (strcmp(scs.subsession->mediumName(), "audio") == 0)
 			{
-				ringBufSink = ipcam_ringsink::createNew(*env, pAudioBuffer, fileSinkBufferSize);
+				//ringBufSink = ipcam_ringsink::createNew(*env, pAudioBuffer, fileSinkBufferSize);
 			}
 
-			subsession->sink = ringBufSink;
-			if (subsession->sink == NULL)
+			scs.subsession->sink = ringBufSink;
+			if (scs.subsession->sink == NULL)
 			{
 				LOGE ("Failed to create ipcam_ringsink for \"%s\": %s\n",
-						subsession->mediumName(),env->getResultMsg());
+						scs.subsession->mediumName(),env.getResultMsg());
 			}
 			else
 			{
-				if(strcmp(subsession->codecName(), "MP4V-ES") == 0 &&
-						subsession->fmtp_config() != NULL) {
+				if(strcmp(scs.subsession->codecName(), "MP4V-ES") == 0 &&
+						scs.subsession->fmtp_config() != NULL) {
 					// For MPEG-4 video RTP streams, the 'config' information
 					// from the SDP description contains useful VOL etc. headers.
 					// Insert this data at the front of the output file:
 					unsigned configLen;
 					unsigned char* configData
-					= parseGeneralConfigStr(subsession->fmtp_config(), configLen);
+					= parseGeneralConfigStr(scs.subsession->fmtp_config(), configLen);
 					struct timeval timeNow;
 					gettimeofday(&timeNow, NULL);
 					ringBufSink->addData(configData, configLen, timeNow);
 					delete[] configData;
 				}
-				subsession->sink->startPlaying(*(subsession->readSource()),
-						subsessionAfterPlaying, subsession);
+				scs.subsession->sink->startPlaying(*(scs.subsession->readSource()), playsubsessionAfterPlaying, scs.subsession);
 
-				if (subsession->rtcpInstance() != NULL)
-				{
-					subsession->rtcpInstance()->setByeHandler(subsessionByeHandler, subsession);
+				// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
+				if (scs.subsession->rtcpInstance() != NULL) {
+					scs.subsession->rtcpInstance()->setByeHandler(playsubsessionByeHandler, scs.subsession);
 				}
 			}
 		}
-
-
-		// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
-		if (scs.subsession->rtcpInstance() != NULL) {
-			scs.subsession->rtcpInstance()->setByeHandler(playsubsessionByeHandler, scs.subsession);
-		}
-	} while (0);
+		 */
+	}while (0);
 
 	// Set up the next subsession, if any:
 	playsetupNextSubsession(rtspClient);
@@ -344,7 +390,7 @@ int ipcam_rtsp_play::Init(char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
 	watchVariable = 0;
 
 
-	rtspClient = playRTSPClient::createNew(*env,url, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
+	rtspClient = playRTSPClient::createNew(*env,url, verbosityLevel, applicationName, tunnelOverHTTPPortNum, pVideoBuffer, pAudioBuffer);
 	if (rtspClient == NULL) {
 		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, env->getResultMsg() );
 		return -1;
@@ -403,13 +449,15 @@ void* StartPlay(void* arg)
 
 // Implementation of "playRTSPClient":
 playRTSPClient* playRTSPClient::createNew(UsageEnvironment& env, char const* rtspURL,
-		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum) {
-	return new playRTSPClient(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
+		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum, ringbufferwriter *vbuffer, ringbufferwriter * abuffer) {
+	return new playRTSPClient(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum, vbuffer, abuffer);
 }
 
 playRTSPClient::playRTSPClient(UsageEnvironment& env, char const* rtspURL,
-		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum)
+		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum, ringbufferwriter *vidbuffer, ringbufferwriter * audbuffer)
 : RTSPClient(env,rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum) {
+	vbuffer = vidbuffer;
+	abuffer = audbuffer;
 	LOGI( "playRTSPClient created\n");
 }
 

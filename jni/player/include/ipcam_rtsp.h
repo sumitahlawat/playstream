@@ -90,15 +90,19 @@ public:
 	static playRTSPClient* createNew(UsageEnvironment& env, char const* rtspURL,
 			int verbosityLevel = 0,
 			char const* applicationName = NULL,
-			portNumBits tunnelOverHTTPPortNum = 0 );
+			portNumBits tunnelOverHTTPPortNum = 0,
+			ringbufferwriter* vbuffer = NULL,
+			ringbufferwriter* abuffer = NULL);
 
 protected:
 	playRTSPClient(UsageEnvironment& env, char const* rtspURL,
-			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum);
+			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum ,ringbufferwriter *vbuffer, ringbufferwriter * abuffer);
 	// called only by createNew();
 	virtual ~playRTSPClient();
 
 public:
+	ringbufferwriter *vbuffer;
+	ringbufferwriter *abuffer;
 	StreamClientState scs;
 };
 

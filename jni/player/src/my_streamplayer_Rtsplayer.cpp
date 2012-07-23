@@ -57,7 +57,7 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 			MyIPCAM1->set_recFile(RecFile);
 
 			errorCam1 = MyIPCAM1->play_connect();
-	//		MyIPCAM1->rec_connect();
+//			MyIPCAM1->rec_connect();
 
 			//create FFMPEG Decoder
 			videoDecode1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
