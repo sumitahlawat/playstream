@@ -19,7 +19,7 @@ public class PlaystreamActivity extends Activity {
 	private Button btn_exit;
 	private EditText url_text;
 
-	@Override
+	@Override 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -33,8 +33,9 @@ public class PlaystreamActivity extends Activity {
 		Log.v("Playstream", "height = "+ display.getHeight());
 		Log.v("Playstream", "width = "+ display.getWidth());     
 		
-		url_text = (EditText) findViewById(R.id.editText1);        
-		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
+		url_text = (EditText) findViewById(R.id.editText1);
+		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");
+//		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
 		final Rtsplayer player = new Rtsplayer();
  
 		btn_start = (Button) findViewById(R.id.button1);				

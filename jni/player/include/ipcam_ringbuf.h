@@ -37,22 +37,16 @@ class ringbuffer
 
         /* Called by Writers */
         void AttachWriter (ringbufferwriter *pBufferWriter);
-
         void DetachWriter (ringbufferwriter *pBufferWriter);
-
         int AddToBuffer (unsigned char *pData, int iLen, bool bMust_fit);
-
         int SpaceLeft ();
-
         int SpaceUsed ();
 
         /* Called by Readers */
         void AttachReader (ringbufferreader *pBufferReader);
-
         void DetachReader (ringbufferreader *pBufferReader);
     public:
         ringbuffer (unsigned int iBuffer_space);
-
         ~ringbuffer ();
 
         void Flush ();
@@ -68,15 +62,11 @@ class ringbufferwriter
 
     public:
         ringbufferwriter (ringbuffer *pRingBuffer);
-
         ~ringbufferwriter ();
 
         int WriteToBuffer (unsigned char *pBuffer, int iLen, bool bMust_fit = false) const;
-
         int SpaceLeft () const;
-
         int SpaceUsed () const;
-
         void Flush () const;
 };
 
@@ -86,7 +76,6 @@ class ringbufferreader
     private:
 
         ringbuffer *m_pRing;
-
         pthread_mutex_t m_Lock;
         pthread_cond_t m_DataReady;
         unsigned int m_iBufferTail, m_iMyBufferLength;
@@ -98,25 +87,15 @@ class ringbufferreader
 
     public:
         ringbufferreader ();
-
         ringbufferreader (ringbuffer *pRingBuffer);
-
         ~ringbufferreader ();
-
         int SpaceUsed () const;
-
         int ReadFromBufferTail (unsigned char *pBuffer, unsigned int iLen);
-
         int ReadFromBufferHead (unsigned char *pBuffer, unsigned int iLen, bool bClear = false, unsigned long iTime = ULONG_MAX);
-
         void SetLowWaterMark (unsigned int bookMark);
-
         unsigned int GetLowWaterMark () const;
-
         void SetHighWaterMark (unsigned int bookMark);
-
         unsigned int GetHighWaterMark () const;
-
         unsigned int GetNumberOfElements () const;
 };
 

@@ -15,19 +15,6 @@
 #include "ipcam_rtsp.h"
 #include "player.h"
 
-/*ffmpeg headers*/
-extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavutil/mathematics.h"
-#include "libswscale/swscale.h"
-}
-
-AVCodec        *pCodec;
-AVCodecContext *pContext;
-AVFrame        *pFrame ,*out_pic;;
-unsigned char  *picBuffer;
-int 			picSize;
-struct SwsContext* img_convert_ctx;
 
 void* StartPlay(void* arg);
 
@@ -116,12 +103,12 @@ void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* result
 	do {
 		UsageEnvironment& env = rtspClient->envir(); // alias
 		StreamClientState& scs = ((playRTSPClient*)rtspClient)->scs; // alias
-		//
-		//		unsigned short fVideoHeight;
-		//		unsigned short fVideoWidth;
-		//		unsigned fVideoFPS;
-		//		char* fCodecName;
-		//		unsigned fileSinkBufferSize = 100000;
+
+		unsigned short fVideoHeight;
+		unsigned short fVideoWidth;
+		unsigned fVideoFPS;
+		char* fCodecName;
+		unsigned fileSinkBufferSize = 100000;
 
 		if (resultCode != 0) {
 			LOGI("failed to setup subsession \n");
@@ -130,24 +117,128 @@ void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* result
 		}
 
 		LOGI("Set up the subsession : before sink create \n");
-		//		ipcam_ringsink* ringBufSink = NULL;
-
-		scs.subsession->sink = DummySink::createNew(env, *scs.subsession, "rtspURL");
-		LOGI("%s : %d \n",__func__,__LINE__);
-		// perhaps use your own custom "MediaSink" subclass instead
-		if (scs.subsession->sink == NULL) {
-			LOGI( "Failed to create a data sink for the \" %d \" subsession: %s \n", *scs.subsession, env.getResultMsg());
-			break;
+		ipcam_ringsink* ringBufSink = NULL;
+		ringBufSink = ipcam_ringsink::createNew(env, ((playRTSPClient*)rtspClient)->vbuffer, fileSinkBufferSize);
+		if(!ringBufSink) {
+			LOGI( "ringBufSink is NULL --- Check this\n");
+			exit(1);
 		}
-		LOGI("%s : %d \n",__func__,__LINE__);
-
-		scs.subsession->miscPtr = rtspClient; // a hack to let subsession handle functions get the "RTSPClient" from the subsession
-		scs.subsession->sink->startPlaying(*(scs.subsession->readSource()),
-				playsubsessionAfterPlaying, scs.subsession);
-		// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
-		if (scs.subsession->rtcpInstance() != NULL) {
-			scs.subsession->rtcpInstance()->setByeHandler(playsubsessionByeHandler, scs.subsession);
+		fVideoHeight = scs.subsession->videoHeight();
+		if(fVideoHeight == 0){
+			fVideoHeight = 240;
 		}
+		fVideoWidth = scs.subsession->videoWidth();
+		if(fVideoWidth == 0){
+			fVideoWidth = 320;
+		}
+		fVideoFPS = scs.subsession->videoFPS();
+		if(fVideoFPS == 0) {
+			fVideoFPS = 15;
+		}
+		fCodecName = (char*) scs.subsession->codecName();
+
+		LOGI("Video Details: Size: %dx%d, FPS: %d, Codec:%s \n",
+				fVideoWidth, fVideoHeight, fVideoFPS, fCodecName);
+
+		scs.subsession->sink = ringBufSink;
+		if (scs.subsession->sink == NULL)
+		{
+			LOGI ("Failed to create ipcam_ringsink for \"%s\": %s\n",
+					scs.subsession->mediumName(),env.getResultMsg());
+		}
+		else
+		{
+			if(strcmp(scs.subsession->codecName(), "MP4V-ES") == 0 &&
+					scs.subsession->fmtp_config() != NULL) {
+				// For MPEG-4 video RTP streams, the 'config' information
+				// from the SDP description contains useful VOL etc. headers.
+				// Insert this data at the front of the output file:
+				LOGI( "add mp4v data to ringbuf\n");
+				unsigned configLen;
+				unsigned char* configData
+				= parseGeneralConfigStr(scs.subsession->fmtp_config(), configLen);
+				struct timeval timeNow;
+				gettimeofday(&timeNow, NULL);
+				ringBufSink->addData(configData, configLen, timeNow);
+				LOGI("Video Details configData : %s \n", configData);
+				delete[] configData;
+			}
+			scs.subsession->sink->startPlaying(*(scs.subsession->readSource()), playsubsessionAfterPlaying, scs.subsession);
+
+			// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
+			if (scs.subsession->rtcpInstance() != NULL) {
+				scs.subsession->rtcpInstance()->setByeHandler(playsubsessionByeHandler, scs.subsession);
+			}
+		}
+
+		/*
+		while ((scs.subsession = scs.iter->next ()) != NULL)
+		{
+			if (scs.subsession->readSource () == NULL)
+			{
+				continue; // was not initiated
+			}
+
+			ipcam_ringsink* ringBufSink = NULL;
+			if (strcmp(scs.subsession->mediumName(), "video") == 0)
+			{
+				ringBufSink = ipcam_ringsink::createNew(env, ((playRTSPClient*)rtspClient)->vbuffer, fileSinkBufferSize);
+				if(!ringBufSink) {
+					LOGE( "ringBufSink is NULL --- Check this\n");
+					exit(1);
+				}
+				fVideoHeight = scs.subsession->videoHeight();
+				if(fVideoHeight == 0){
+					fVideoHeight = 240;
+				}
+				fVideoWidth = scs.subsession->videoWidth();
+				if(fVideoWidth == 0){
+					fVideoWidth = 320;
+				}
+				fVideoFPS = scs.subsession->videoFPS();
+				if(fVideoFPS == 0) {
+					fVideoFPS = 15;
+				}
+				fCodecName = (char*) scs.subsession->codecName();
+
+				LOGI("Video Details: Size: %dx%d, FPS: %d, Codec:%s \n",
+						fVideoWidth, fVideoHeight, fVideoFPS, fCodecName);
+			}
+			else if (strcmp(scs.subsession->mediumName(), "audio") == 0)
+			{
+				//ringBufSink = ipcam_ringsink::createNew(*env, pAudioBuffer, fileSinkBufferSize);
+			}
+
+			scs.subsession->sink = ringBufSink;
+			if (scs.subsession->sink == NULL)
+			{
+				LOGE ("Failed to create ipcam_ringsink for \"%s\": %s\n",
+						scs.subsession->mediumName(),env.getResultMsg());
+			}
+			else
+			{
+				if(strcmp(scs.subsession->codecName(), "MP4V-ES") == 0 &&
+						scs.subsession->fmtp_config() != NULL) {
+					// For MPEG-4 video RTP streams, the 'config' information
+					// from the SDP description contains useful VOL etc. headers.
+					// Insert this data at the front of the output file:
+					unsigned configLen;
+					unsigned char* configData
+					= parseGeneralConfigStr(scs.subsession->fmtp_config(), configLen);
+					struct timeval timeNow;
+					gettimeofday(&timeNow, NULL);
+					ringBufSink->addData(configData, configLen, timeNow);
+					delete[] configData;
+				}
+				scs.subsession->sink->startPlaying(*(scs.subsession->readSource()), playsubsessionAfterPlaying, scs.subsession);
+
+				// Also set a handler to be called if a RTCP "BYE" arrives for this subsession:
+				if (scs.subsession->rtcpInstance() != NULL) {
+					scs.subsession->rtcpInstance()->setByeHandler(playsubsessionByeHandler, scs.subsession);
+				}
+			}
+		}
+		 */
 	}while (0);
 
 	// Set up the next subsession, if any:
@@ -164,6 +255,7 @@ void playcontinueAfterPLAY(RTSPClient* rtspClient, int resultCode, char* resultS
 		}
 
 		LOGI( "Started playing session");
+		LOGI("...\n");
 
 		return;
 	} while (0);
@@ -172,12 +264,13 @@ void playcontinueAfterPLAY(RTSPClient* rtspClient, int resultCode, char* resultS
 	playshutdownStream(rtspClient);
 }
 
+
 // Implementation of the other event handlers:
 
 void playsessionAfterPlaying(void* clientData) {
 	RTSPClient* rtspClient = (RTSPClient*)clientData;
 
-	LOGI("%s : %d \n",__func__,__LINE__);
+	LOGI("sessionAfterPlaying \n");
 	// Shut down the stream:
 	playshutdownStream(rtspClient);
 }
@@ -186,7 +279,7 @@ void playsubsessionAfterPlaying(void* clientData) {
 	MediaSubsession* subsession = (MediaSubsession*)clientData;
 	RTSPClient* rtspClient = (RTSPClient*)(subsession->miscPtr);
 
-	LOGI("%s : %d \n",__func__,__LINE__);
+	LOGI("recsubsessionAfterPlaying \n\n");
 
 	// Begin by closing this subsession's stream:
 	Medium::close(subsession->sink);
@@ -371,225 +464,4 @@ playRTSPClient::playRTSPClient(UsageEnvironment& env, char const* rtspURL,
 playRTSPClient::~playRTSPClient()
 {
 	LOGI("~playRTSPClient ");
-}
-
-
-// Implementation of "DummySink":
-
-// Even though we're not going to be doing anything with the incoming data, we still need to receive it.
-// Define the size of the buffer that we'll use:
-#define DUMMY_SINK_RECEIVE_BUFFER_SIZE 100000
-
-DummySink* DummySink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId) {
-	return new DummySink(env, subsession, streamId);
-}
-
-DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId)
-: MediaSink(env),
-  fSubsession(subsession) {
-	fStreamId = strDup(streamId);
-	fReceiveBuffer = new u_int8_t[DUMMY_SINK_RECEIVE_BUFFER_SIZE];
-	avcodec_init();
-	avcodec_register_all();
-	pCodec = avcodec_find_decoder (CODEC_ID_MPEG4);
-	if (!pCodec)
-	{
-		LOGI("Could not find codec to decode MPEG2 video\n");
-	}
-
-	pFrame = avcodec_alloc_frame();
-	pContext = avcodec_alloc_context();
-	pContext->bit_rate = 1000;  //temp value
-	/* resolution must be a multiple of two */
-	pContext->width =  640;   //temp value width
-	pContext->height = 480;    //temp value height
-	/* frames per second */
-	pContext->time_base= (AVRational){1,25};
-	pContext->pix_fmt = PIX_FMT_YUV420P;
-
-	//calculate picture size and allocate memory
-	picSize = avpicture_get_size(pContext->pix_fmt, pContext->width, pContext->height);
-	LOGI("Width %d, Height %d picSize %d\n", pContext->width, pContext->height, picSize);
-
-	picBuffer = new uint8_t[picSize];
-
-	if (pCodec->capabilities & CODEC_CAP_TRUNCATED)
-	{
-		LOGI("We do not send one total frame at one time\n");
-		pContext->flags |= CODEC_FLAG_TRUNCATED;
-		pContext->flags |= CODEC_FLAG_EMU_EDGE;
-	}
-
-	if (avcodec_open (pContext, pCodec) < 0)
-	{
-		LOGI( "Could not open video codec\n");
-	}
-
-	LOGI("InitMPEG4Dec complete\n");
-
-	/*	glClear(GL_COLOR_BUFFER_BIT);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glBindTexture(GL_TEXTURE_2D, textureConverted);
-
-	//this is slow
-	glTexImage2D(GL_TEXTURE_2D,  target
-	0,  level
-	GL_RGBA,  internal format
-	textureWidth,  width
-	textureHeight,  height
-	0,  border
-	GL_RGBA,  format
-	GL_UNSIGNED_BYTE, type
-	pFrameConverted->data[0]);
-
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-	glVertexPointer(3, GL_FLOAT, 0, vertices);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	LOGI("Surface created\n");*/
-
-}
-
-DummySink::~DummySink() {
-	delete[] fReceiveBuffer;
-	delete[] fStreamId;
-}
-
-void DummySink::afterGettingFrame(void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
-		struct timeval presentationTime, unsigned durationInMicroseconds) {
-	DummySink* sink = (DummySink*)clientData;
-	sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime, durationInMicroseconds);
-}
-
-void DummySink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
-		struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
-	// We've just received a frame of data.  (Optionally) print out information about it:
-	//	if (fStreamId != NULL) LOGI( "Stream :%s \n",fStreamId);
-	//LOGI("%s  /  %s : :\tReceived %d bytes", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
-	if (strcmp(fSubsession.mediumName(), "video") == 0)
-	{
-		//decode data here
-
-		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-	}
-	if (numTruncatedBytes > 0) envir() << " (with " << numTruncatedBytes << " bytes truncated)";
-	char uSecsStr[6+1]; // used to output the 'microseconds' part of the presentation time
-	sprintf(uSecsStr, "%06u", (unsigned)presentationTime.tv_usec);
-	//	LOGI(".\tPresentation time: %d.%d",(unsigned)presentationTime.tv_sec, uSecsStr);
-	if (fSubsession.rtpSource() != NULL && !fSubsession.rtpSource()->hasBeenSynchronizedUsingRTCP()) {
-		//		LOGI("!"); // mark the debugging output to indicate that this presentation time is not RTCP-synchronized
-	}
-	// Then continue, to request the next frame of data:
-	continuePlaying();
-}
-
-char pgmname[] = "/mnt/sdcard/image.pgm";
-static void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize, char *filename)
-{
-	LOGI("%s : %d : bufferSize :%d\n",__func__,__LINE__);
-	FILE *f;
-	int i;
-	int offset = 0;
-
-	f=fopen(filename,"w");
-	fprintf(f,"P5\n%d %d\n%d\n",xsize,ysize,255);
-	for(i=0;i<ysize;i++) {
-		offset = i*wrap;
-		fwrite(buf + offset,1,xsize,f);
-	}
-	fclose(f);
-}
-
-void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
-	FILE *pFile;
-	char szFilename[32];
-	int  y;
-
-	LOGI("%s : %d : %d \n",__func__,__LINE__,iFrame);
-	// Open file
-	sprintf(szFilename, "/mnt/sdcard/ipcam1/frame%d.ppm", iFrame);
-	pFile=fopen(szFilename, "wb");
-	if(pFile==NULL)
-		return;
-
-	// Write header
-	fprintf(pFile, "P6\n%d %d\n255\n", width, height);
-
-	// Write pixel data
-	for(y=0; y<height; y++)
-		fwrite(pFrame->data[0]+y*pFrame->linesize[0], 1, width*3, pFile);
-
-	// Close file
-	fclose(pFile);
-	LOGI("%s : %d : \n",__func__,__LINE__);
-}
-
-int savep = 0;
-
-int DummySink::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
-{
-	int frame, gotPicture, len;
-	//	char buf[1024];
-	uint8_t *buf;
-	int numBytes=avpicture_get_size(PIX_FMT_RGB24, pContext->width, pContext->height);
-	buf=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
-	LOGI("%s : %d : bufferSize :%d\n",__func__,__LINE__,bufferSize);
-	AVPacket avpkt;
-	av_init_packet(&avpkt);
-
-	avpkt.size = bufferSize;
-	avpkt.data = inBuffer;
-
-	frame = 0;
-	while(avpkt.size > 0)
-	{
-		len = avcodec_decode_video2(pContext, pFrame, &gotPicture, &avpkt);
-		if (len < 0) {
-			LOGI("Error while decoding frame %d\n", frame);
-			return -1;
-		}
-		if (gotPicture) {
-
-			out_pic = avcodec_alloc_frame();
-			if (!out_pic)
-				return -1;
-			img_convert_ctx = sws_getContext(pContext->width, pContext->height, PIX_FMT_YUV420P, pContext->width, pContext->height, PIX_FMT_RGB565,SWS_BICUBIC, NULL, NULL, NULL);
-			if (!img_convert_ctx)
-				return -1;
-
-
-			avpicture_fill((AVPicture *)out_pic, buf, PIX_FMT_RGB565, pContext->width, pContext->height);
-			sws_scale(img_convert_ctx, pFrame->data, pFrame->linesize, 0, pContext->height, out_pic->data, out_pic->linesize);
-
-			sws_freeContext(img_convert_ctx);
-			img_convert_ctx = NULL;
-			savep++;
-			if((savep%5)==0)
-				SaveFrame(out_pic, pContext->width,
-						pContext->height, savep);
-
-			//			snprintf(buf, sizeof(buf), pgmname, frame);
-			//			pgm_save(pFrame->data[0], pFrame->linesize[0],
-			//					pContext->width, pContext->height, buf);
-			//find a way to display now
-
-		}
-		avpkt.size -= len;
-		avpkt.data += len;
-		frame++;
-	}
-	return 0;
-}
-
-Boolean DummySink::continuePlaying() {
-	if (fSource == NULL) return False; // sanity check (should not happen)
-
-	// Request the next frame of data from our input source.  "afterGettingFrame()" will get called later, when it arrives:
-	fSource->getNextFrame(fReceiveBuffer, DUMMY_SINK_RECEIVE_BUFFER_SIZE,
-			afterGettingFrame, this,
-			onSourceClosure, this);
-	return True;
 }

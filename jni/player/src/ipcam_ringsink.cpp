@@ -13,14 +13,13 @@
  */
 
 #include "ipcam_ringsink.h"
-#include "GroupsockHelper.hh"
 
 ipcam_ringsink::ipcam_ringsink (UsageEnvironment& env,
 								ringbufferwriter *pBufferWriter,
 								unsigned bufferSize) :
 								MediaSink(env), fBufferSize(bufferSize)
 {
-	LOGI("ipcam_ringsink \n");
+	LOGI("%s : %d \n",__func__,__LINE__);
     fBuffer = new unsigned char[bufferSize];
     pBuffer = pBufferWriter;
     memset((void*)&initTime,0x0,sizeof(timeval));
@@ -28,6 +27,7 @@ ipcam_ringsink::ipcam_ringsink (UsageEnvironment& env,
 
 ipcam_ringsink::~ipcam_ringsink ()
 {
+	LOGI("%s : %d \n",__func__,__LINE__);
     delete[] fBuffer;
 }
 
@@ -35,6 +35,7 @@ ipcam_ringsink* ipcam_ringsink::createNew (UsageEnvironment& env,
 								ringbufferwriter *pBufferWriter,
 								unsigned bufferSize)
 {
+	LOGI("%s : %d \n",__func__,__LINE__);
     do
     {
         return new ipcam_ringsink (env, pBufferWriter, bufferSize);
@@ -53,7 +54,7 @@ Boolean ipcam_ringsink::continuePlaying ()
     fSource->getNextFrame (fBuffer, fBufferSize, afterGettingFrame, this,
 										  onSourceClosure, this);
 
-	LOGI("^^^^fSource \n");
+    LOGI("%s : %d \n",__func__,__LINE__);
     return True;
 }
 
@@ -62,6 +63,7 @@ void ipcam_ringsink::afterGettingFrame (void* clientData, unsigned frameSize,
 										  struct timeval presentationTime,
 										  unsigned /*durationInMicroseconds*/)
 {
+	LOGI("%s : %d \n",__func__,__LINE__);
     ipcam_ringsink* sink = (ipcam_ringsink*)clientData;
     sink->afterGettingFrame1 (frameSize, presentationTime);
 }
@@ -69,7 +71,7 @@ void ipcam_ringsink::afterGettingFrame (void* clientData, unsigned frameSize,
 void ipcam_ringsink::addData (unsigned char* data, unsigned dataSize,
 										  struct timeval presentationTime)
 {
-	LOGI ("ipcam_ringsink::addData  ,,  dataSize = %d spaceleft :%d \n", dataSize ,pBuffer->SpaceLeft ());
+	LOGI ("%s,  dataSize = %d spaceleft :%d \n",__func__, dataSize ,pBuffer->SpaceLeft ());
     struct timeval tval =  presentationTime;
     if (initTime.tv_sec == 0 && initTime.tv_usec == 0)
     {
@@ -91,6 +93,7 @@ void ipcam_ringsink::addData (unsigned char* data, unsigned dataSize,
 void ipcam_ringsink::afterGettingFrame1 (unsigned frameSize,
 										 struct timeval presentationTime)
 {
+	LOGI("%s : %d \n",__func__,__LINE__);
     addData (fBuffer, frameSize, presentationTime);
     // Then try getting the next frame:
     continuePlaying ();
