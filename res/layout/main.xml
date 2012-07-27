@@ -7,55 +7,57 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp" >
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/button3"            
-            android:layout_marginLeft="50dp"
+            android:id="@+id/button3"
             android:layout_width="106dp"
-            android:layout_height="wrap_content"            
-            android:text="stop"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
             android:textSize="20sp" />
 
         <Button
             android:id="@+id/button1"
-            android:layout_marginLeft="50dp"
             android:layout_width="106dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="record"
+            android:layout_marginLeft="40dp"
             android:textSize="20sp" />
-        
+
         <Button
             android:id="@+id/button4"
-            android:layout_marginLeft="50dp"
             android:layout_width="106dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="play"
+            android:layout_marginLeft="40dp"
             android:textSize="20sp" />
-        
     </LinearLayout>
 
     <EditText
         android:id="@+id/editText1"
         android:layout_width="600dp"
         android:layout_height="60dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="50dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="20dp"
         android:ems="10"
-        android:textSize="20sp" >
-
-        <requestFocus />
-    </EditText>
+        android:inputType="text"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="84dp"
         android:layout_height="60dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="50dp"
-        android:text="exit"
+        android:layout_gravity="left"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="20dp"
         android:textSize="20sp" />
+    <!-- View Container -->
+
+    <android.opengl.GLSurfaceView
+        android:id="@+id/glSurface"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

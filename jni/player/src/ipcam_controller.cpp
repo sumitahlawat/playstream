@@ -17,15 +17,11 @@
 
 ipcam_controller::ipcam_controller (char* URL)
 {
-    LOGI ("Contruct IPCAM control engine\n");
-
     IPCAM_rtsp_play = new ipcam_rtsp_play();
 	IPCAM_rtsp_rec = new ipcam_rtsp_rec();
 
     pRTSPUrl = URL;
 	filename = NULL;
-
-    LOGI ("Contruct IPCAM control engine completed\n");
 }
 
 ipcam_controller::~ipcam_controller ()
@@ -35,15 +31,10 @@ ipcam_controller::~ipcam_controller ()
     LOGI ("Destroy IPCAM control engine completed\n");
 }
 
-int ipcam_controller::InitMedia (ringbufferwriter *pVideoWriter,
-								 ringbufferwriter *pAudioWriter)
+int ipcam_controller::InitMedia ()
 {
     LOGI ("Enter ipcam_controller::InitMedia Player \n");
-
-	m_pRBufferAudioWriterRx = pAudioWriter;
-	m_pRBufferVideoWriterRx = pVideoWriter;
-
-	if (IPCAM_rtsp_play->Init(pRTSPUrl, m_pRBufferVideoWriterRx, m_pRBufferAudioWriterRx) != 1)
+	if (IPCAM_rtsp_play->Init(pRTSPUrl) != 1)
     {
         LOGI ("setupVideoCall:RTSP Rx Configuration failure\n");
         return -1;

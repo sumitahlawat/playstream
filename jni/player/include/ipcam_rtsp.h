@@ -4,9 +4,7 @@
 #include "BasicUsageEnvironment.hh"
 #include "GroupsockHelper.hh"
 #include "liveMedia.hh"
-
-#include "ipcam_ringsink.h"
-
+#include <pthread.h>
 //#include <utils/threads.h>
 class StreamClientState;
 class ourRTSPClient;
@@ -56,17 +54,12 @@ class ipcam_rtsp_rec :  public ipcam_rtsp
 
 class ipcam_rtsp_play :  public ipcam_rtsp
 {
-    private:
-		ringbufferwriter *pVideoBuffer; ///< video buffer to save the received depacketized video stream
-		ringbufferwriter *pAudioBuffer; ///< audio buffer to save the received depacketized audio stream
-
     public:
 		int StartRecv ();
 		int Close ();
 
 		playRTSPClient* rtspClient;
-		int Init (char *url, ringbufferwriter *pCodecHRtspVideoBuffer,
-					ringbufferwriter *pCodecHRtspAudioBuffer);
+		int Init (char *url);
 		ipcam_rtsp_play ();
 		~ipcam_rtsp_play ();
 };
@@ -90,19 +83,16 @@ public:
 	static playRTSPClient* createNew(UsageEnvironment& env, char const* rtspURL,
 			int verbosityLevel = 0,
 			char const* applicationName = NULL,
-			portNumBits tunnelOverHTTPPortNum = 0,
-			ringbufferwriter* vbuffer = NULL,
-			ringbufferwriter* abuffer = NULL);
+			portNumBits tunnelOverHTTPPortNum = 0);
 
 protected:
 	playRTSPClient(UsageEnvironment& env, char const* rtspURL,
-			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum ,ringbufferwriter *vbuffer, ringbufferwriter * abuffer);
+			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum);
 	// called only by createNew();
 	virtual ~playRTSPClient();
 
 public:
-	ringbufferwriter *vbuffer;
-	ringbufferwriter *abuffer;
+
 	StreamClientState scs;
 };
 
@@ -128,16 +118,16 @@ public:
 
 //temp class to try direct decoding, instead of using ringbuffer
 
-class DummySink: public MediaSink {
+class DecoderSink: public MediaSink {
 public:
-  static DummySink* createNew(UsageEnvironment& env,
+  static DecoderSink* createNew(UsageEnvironment& env,
 			      MediaSubsession& subsession, // identifies the kind of data that's being received
 			      char const* streamId = NULL); // identifies the stream itself (optional)
 
 private:
-  DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId);
+  DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId);
     // called only by "createNew()"
-  virtual ~DummySink();
+  virtual ~DecoderSink();
 
   static void afterGettingFrame(void* clientData, unsigned frameSize,
                                 unsigned numTruncatedBytes,
@@ -145,8 +135,6 @@ private:
                                 unsigned durationInMicroseconds);
   void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
 			 struct timeval presentationTime, unsigned durationInMicroseconds);
-  void addData(unsigned char const* data, unsigned dataSize,
-	       struct timeval presentationTime);
   int DecVideo (unsigned char* pBuffer, unsigned int bufferSize);
 
 private:

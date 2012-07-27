@@ -21,14 +21,10 @@ class ipcam_controller
         static void *StartIPCAMRx (void *arg);
 
     public:
-		ringbufferwriter* m_pRBufferAudioWriterRx; ///< Instance of Audio Ringbuffer Write for Rx
-		ringbufferwriter* m_pRBufferVideoWriterRx; ///< Instance of Audio Ringbuffer Writer for Rx
-
         ipcam_controller (char* URL);
         virtual ~ipcam_controller ();
 
-		int InitMedia (ringbufferwriter *pVideoWriter,
-					   ringbufferwriter *pAudioWriter);
+		int InitMedia ();
 		int InitMedia (char* fname, int fps);
 
         int StartMedia ();

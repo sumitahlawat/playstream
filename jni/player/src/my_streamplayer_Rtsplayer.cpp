@@ -1,10 +1,8 @@
-#include "ipcam_vdec.h"
 
 #undef PixelFormat
 
 #define VIDEO_WIDTH	192//320
 #define VIDEO_HEIGHT	242//240
-
 
 #include "ipcam_camera.h"
 #include "player.h"
@@ -18,19 +16,9 @@ ipcam_camera *MyIPCAM4 = NULL;
 
 static int errorCam1 = 0;
 
-ipcam_vdec *videoDecode1 = NULL;
-ipcam_vdec *videoDecode2 = NULL;
-ipcam_vdec *videoDecode3 = NULL;
-ipcam_vdec *videoDecode4 = NULL;
-
 void DisplayCb_1 (uint8_t* aData[], int aDataLen)
 {
 	LOGD("display frame data after callback");
-}
-
-void create_surfaces(int ID, int x, int y)
-{
-	LOGD("create some glsurface here using example from native player");
 }
 
 /*
@@ -47,24 +35,14 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 
 	LOGD("CAM ID %d \tURL: %s \t FILE: %s\n ", ID, rtspURL, RecFile);
 
-	create_surfaces(ID, x, y);
-
 	switch(ID)
 	{
 		case 1:
 			MyIPCAM1 = new ipcam_camera(rtspURL, ID, frame_rate);
 			MyIPCAM1->init();      // initialize ring buffers
 			MyIPCAM1->set_recFile(RecFile);
-
 			errorCam1 = MyIPCAM1->play_connect();
 //			MyIPCAM1->rec_connect();
-
-			//create FFMPEG Decoder
-			videoDecode1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
-			MyIPCAM1->pVDec = videoDecode1;
-
-			usleep (1000);
-			videoDecode1->InitMPEG4Dec();
 
 			LOGD("IPCAM %d errorCam1 %d\n", ID, errorCam1);
 			break;
@@ -119,7 +97,6 @@ void Java_my_streamplayer_Rtsplayer_StopRec
 			LOGE("INVALID CAM-ID %d", ID);
 			break;
 	}
-
 }
 
 /*
@@ -134,7 +111,6 @@ void  Java_my_streamplayer_Rtsplayer_DestroyRec
 	{
 		case 1:
 			MyIPCAM1->deinit();
-//			surface1->clear();
 			LOGD("IPCAM %d DEINIT Complete\n", ID);
 			break;
 

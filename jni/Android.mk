@@ -231,15 +231,12 @@ LOCAL_MODULE:= librtsp
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/BasicUsageEnvironment/include $(LOCAL_PATH)/liveMedia/include $(LOCAL_PATH)/player/include $(LOCAL_PATH)/player/jni-include $(LOCAL_PATH)/rockffmpeg/android/armv7-a/include
 LOCAL_LDFLAGS += -Wl,--export-dynamic
 LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1  
-LOCAL_SRC_FILES	:= \
+LOCAL_SRC_FILES	:= 	\
+		player/src/my_streamplayer_Rtsplayer.cpp \
+		player/src/ipcam_camera.cpp \
 		player/src/ipcam_controller.cpp \
 		player/src/ipcam_rtsp_rec.cpp \
 		player/src/ipcam_rtsp_play.cpp \
-		player/src/ipcam_vdec.cpp \
-		player/src/ipcam_camera.cpp \
-		player/src/ipcam_ringbuf.cpp \
-		player/src/ipcam_ringsink.cpp \
-		player/src/my_streamplayer_Rtsplayer.cpp
 		
 LOCAL_LDLIBS := -llog -ldl -ljnigraphics -lz -lm $(LOCAL_PATH)/rockffmpeg/android/armv7-a/libffmpeg.so 
 
