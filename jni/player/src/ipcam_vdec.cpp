@@ -15,15 +15,54 @@
 #include "ipcam_vdec.h"
 #include "player.h"
 
+#define VIDEO_WIDTH		320
+#define VIDEO_HEIGHT	240
+
+ipcam_vdec* ipcam_vdec::m_Decoder1=NULL;
+ipcam_vdec* ipcam_vdec::m_Decoder2=NULL;
+ipcam_vdec* ipcam_vdec::m_Decoder3=NULL;
+ipcam_vdec* ipcam_vdec::m_Decoder4=NULL;
+
 extern void DisplayCb_1 (uint8_t* aData[], int aDataLen);
 extern void DisplayCb_2 (uint8_t* aData[], int aDataLen);
 extern void DisplayCb_3 (uint8_t* aData[], int aDataLen);
 extern void DisplayCb_4 (uint8_t* aData[], int aDataLen);
 
+ipcam_vdec* ipcam_vdec::getInstance(int id)
+{
+	switch (id)
+	{
+	case 1:
+		if (!m_Decoder1)
+			m_Decoder1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
+		return m_Decoder1;
+		break;
+	case 2:
+		if (!m_Decoder2)
+			m_Decoder2 = new ipcam_vdec(2, VIDEO_WIDTH, VIDEO_HEIGHT);
+		return m_Decoder2;
+		break;
+	case 3:
+		if (!m_Decoder3)
+			m_Decoder3 = new ipcam_vdec(3, VIDEO_WIDTH, VIDEO_HEIGHT);
+		return m_Decoder3;
+		break;
+	case 4:
+		if (!m_Decoder4)
+			m_Decoder4 = new ipcam_vdec(4, VIDEO_WIDTH, VIDEO_HEIGHT);
+		return m_Decoder4;
+		break;
+	default:
+		if (!m_Decoder1)
+			m_Decoder1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
+		return m_Decoder1;
+		break;
+	}
+}
+
 ipcam_vdec :: ipcam_vdec(int camID, int width, int height)
 {
 	LOGI("Construct video decoder, camID = %d\n", camID);
-
 	// init pointers
 	pCodec = NULL;
 	pContext = NULL;
@@ -60,9 +99,7 @@ ipcam_vdec :: ipcam_vdec(int camID, int width, int height)
 ipcam_vdec::~ipcam_vdec()
 {
 	LOGI("Destroy video decoder\n");
-
 	pCallback = NULL; ///** Set callback function to NULL
-
 	if (pContext != NULL) // Close software decoder, free all the allocated memory
 	{
 		avcodec_close (pContext);
@@ -135,15 +172,13 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 	fclose(pFile);
 }
 
-int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize, void* pPriv)
+int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 {
-
 	int frame, gotPicture, len;
 	//	char buf[1024];
 	uint8_t *buf;
 	int numBytes=avpicture_get_size(PIX_FMT_RGB565, pContext->width, pContext->height);
 	buf=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
-	LOGI("%s : %d : bufferSize :%d\n",__func__,__LINE__,bufferSize);
 	AVPacket avpkt;
 	av_init_packet(&avpkt);
 
@@ -171,7 +206,7 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize, void*
 			sws_scale(img_convert_ctx, pFrame->data, pFrame->linesize, 0, pContext->height, out_pic->data, out_pic->linesize);
 			sws_freeContext(img_convert_ctx);
 			img_convert_ctx = NULL;
-
+			pCallback(out_pic->data, (pContext->width*pContext->height*2));
 			savep++;
 			//			if((savep%15)==0)
 			//				SaveFrame(out_pic, pContext->width,	pContext->height, savep);

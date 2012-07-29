@@ -1,4 +1,3 @@
-
 #ifndef _IPCAM_VDEC_H_
 #define _IPCAM_VDEC_H_
 
@@ -27,6 +26,14 @@ private:
 	int videoWindow;
 	unsigned int framesize;
 
+	ipcam_vdec (int camID, int width, int height);
+	~ipcam_vdec ();
+
+	static ipcam_vdec* m_Decoder1;
+	static ipcam_vdec* m_Decoder2;
+	static ipcam_vdec* m_Decoder3;
+	static ipcam_vdec* m_Decoder4;
+
 public:
 	AVCodec        *pCodec;
 	AVCodecContext *pContext;
@@ -35,11 +42,10 @@ public:
 	int 			picSize;
 	struct SwsContext* img_convert_ctx;
 
-	ipcam_vdec (int camID, int width, int height);
-	~ipcam_vdec ();
+	static ipcam_vdec* getInstance(int camID);
 
 	int InitMPEG4Dec ();
-	int DecVideo (unsigned char* pBuffer, unsigned int bufferSize, void* pPriv);
+	int DecVideo (unsigned char* pBuffer, unsigned int bufferSize);
 };
 
 #endif // _IPCAM_VDEC_H_

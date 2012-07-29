@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_native_1gl_1render
  * Signature: (Landroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;IIII)V
  */
 JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_CreateRec
-  (JNIEnv *, jobject, jobject, jstring, jstring, jint, jint, jint, jint);
+  (JNIEnv *, jobject, jstring, jstring, jint, jint, jint, jint);
 
 /*
  * Class:     my_streamplayer_Rtsplayer

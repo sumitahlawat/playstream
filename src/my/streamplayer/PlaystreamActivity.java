@@ -42,11 +42,10 @@ public class PlaystreamActivity extends Activity {
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");
 		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
-
+		url_text.setText("rtsp://192.168.101.199/live.sdp");
 		//creating an RGB565 bitmap to render frames
 		mBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.RGB_565);
 		
-
 		btn_start = (Button) findViewById(R.id.button1);	
 		btn_start.setText("record");
 		btn_start.setOnClickListener(new View.OnClickListener() {
@@ -54,7 +53,7 @@ public class PlaystreamActivity extends Activity {
 				btn_start.setEnabled(false);
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				rtplayer.CreateRec(mBitmap, url, recfile, 1, 10, 10, 30);
+				rtplayer.CreateRec(url, recfile, 1, 10, 10, 30);
 				rtplayer.StartRec(1);
 				btn_start.setEnabled(true);
 			}
@@ -67,7 +66,7 @@ public class PlaystreamActivity extends Activity {
 				btn_play.setEnabled(false);
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				rtplayer.CreateRec(mBitmap, url, recfile, 1, 10, 10, 30);
+				rtplayer.CreateRec( url, recfile, 1, 10, 10, 30);
 				rtplayer.StartRec(1);
 				btn_start.setEnabled(true);
 			}

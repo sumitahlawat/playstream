@@ -52,7 +52,6 @@ public:
 	~ipcam_rtsp_rec ();
 };
 
-
 class ipcam_rtsp_play :  public ipcam_rtsp
 {
 public:
@@ -60,6 +59,7 @@ public:
 	int Close ();
 
 	playRTSPClient* rtspClient;
+	ipcam_vdec *decoder;
 	int Init (char *url);
 	ipcam_rtsp_play ();
 	~ipcam_rtsp_play ();
@@ -93,7 +93,6 @@ protected:
 	virtual ~playRTSPClient();
 
 public:
-
 	StreamClientState scs;
 };
 
@@ -123,12 +122,11 @@ class DecoderSink: public MediaSink {
 public:
 	static DecoderSink* createNew(UsageEnvironment& env,
 			MediaSubsession& subsession, // identifies the kind of data that's being received
-			char const* streamId = NULL, // identifies the stream itself (optional)
-			ipcam_vdec* decoder=NULL);
+			char const* streamId = NULL// identifies the stream itself (optional)
+			);
 
 private:
-	DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId ,ipcam_vdec *decoder);
-	// called only by "createNew()"
+	DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId);
 	virtual ~DecoderSink();
 
 	static void afterGettingFrame(void* clientData, unsigned frameSize,
@@ -137,7 +135,6 @@ private:
 			unsigned durationInMicroseconds);
 	void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
 			struct timeval presentationTime, unsigned durationInMicroseconds);
-
 private:
 	// redefined virtual functions:
 	virtual Boolean continuePlaying();
@@ -146,7 +143,5 @@ private:
 	u_int8_t* fReceiveBuffer;
 	MediaSubsession& fSubsession;
 	char* fStreamId;
-	ipcam_vdec *decoder;
 };
-
 #endif // _IPCAM_RTSP_H_

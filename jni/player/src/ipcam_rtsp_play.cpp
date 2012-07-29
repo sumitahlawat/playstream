@@ -22,13 +22,6 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
-//AVCodec        *pCodec;
-//AVCodecContext *pContext;
-//AVFrame        *pFrame ,*out_pic;;
-//unsigned char  *picBuffer;
-//int 			picSize;
-//struct SwsContext* img_convert_ctx;
-
 void* StartPlay(void* arg);
 
 // RTSP 'response handlers':
@@ -294,12 +287,10 @@ int ipcam_rtsp_play::Init(char *url)
 int ipcam_rtsp_play::StartRecv()
 {
 	LOGI( "ipcam_rtsp_play : play thread start\n");
-	if (!pthread_create(&rtsp_thread, NULL, StartPlay, this))
-	{
+	if (!pthread_create(&rtsp_thread, NULL, StartPlay, this)) {
 		return 1;
 	}
-	else
-	{
+	else {
 		return -1;
 	}
 }
@@ -355,7 +346,6 @@ playRTSPClient::~playRTSPClient()
 	LOGI("~playRTSPClient ");
 }
 
-
 // Implementation of "DecoderSink":
 #define DECODER_SINK_RECEIVE_BUFFER_SIZE 100000
 
@@ -368,42 +358,6 @@ DecoderSink::DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, cha
   fSubsession(subsession) {
 	fStreamId = strDup(streamId);
 	fReceiveBuffer = new u_int8_t[DECODER_SINK_RECEIVE_BUFFER_SIZE];
-	/*avcodec_init();
-	avcodec_register_all();
-	pCodec = avcodec_find_decoder (CODEC_ID_MPEG4);
-	if (!pCodec)
-	{
-		LOGI("Could not find codec to decode MPEG2 video\n");
-	}
-
-	pFrame = avcodec_alloc_frame();
-	pContext = avcodec_alloc_context();
-	pContext->bit_rate = 1000;  //temp value
-	 resolution must be a multiple of two
-	pContext->width =  320;   //temp value width
-	pContext->height = 240;    //temp value height
-	 frames per second
-	pContext->time_base= (AVRational){1,25};
-	pContext->pix_fmt = PIX_FMT_YUV420P;  //old
-	pContext->pix_fmt = PIX_FMT_RGB24;    //for storing ppm's
-	pContext->pix_fmt =PIX_FMT_RGB565;   //for glsurface
-
-	//calculate picture size and allocate memory
-	picSize = avpicture_get_size(pContext->pix_fmt, pContext->width, pContext->height);
-	LOGI("Width %d, Height %d picSize %d\n", pContext->width, pContext->height, picSize);
-
-	picBuffer = new uint8_t[picSize];
-
-	if (pCodec->capabilities & CODEC_CAP_TRUNCATED)	{
-		//We do not send one total frame at one time
-		pContext->flags |= CODEC_FLAG_TRUNCATED;
-		pContext->flags |= CODEC_FLAG_EMU_EDGE;
-	}
-
-	if (avcodec_open (pContext, pCodec) < 0) {
-		LOGI( "Could not open video codec\n");
-	}
-	LOGI("InitMPEG4Dec complete\n"); */
 }
 
 DecoderSink::~DecoderSink() {
@@ -419,18 +373,15 @@ void DecoderSink::afterGettingFrame(void* clientData, unsigned frameSize, unsign
 
 void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
 		struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
-	LOGI("%s : %d : \n",__func__,__LINE__);
 	// We've just received a frame of data.  (Optionally) print out information about it:
 	//	if (fStreamId != NULL) LOGI( "Stream :%s \n",fStreamId);
 	//LOGI("%s  /  %s : :\tReceived %d bytes", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
-		//decode data here
-
 		//call decoder function from here : somehow :P
-//		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-
-
+		//		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		ipcam_vdec* videc = ipcam_vdec::getInstance(1);
+		videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
 	}
 	if (numTruncatedBytes > 0) envir() << " (with " << numTruncatedBytes << " bytes truncated)";
 	char uSecsStr[6+1]; // used to output the 'microseconds' part of the presentation time
