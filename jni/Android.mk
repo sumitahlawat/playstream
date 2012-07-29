@@ -234,6 +234,7 @@ LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=
 LOCAL_SRC_FILES	:= 	\
 		player/src/my_streamplayer_Rtsplayer.cpp \
 		player/src/ipcam_camera.cpp \
+		player/src/ipcam_vdec.cpp \
 		player/src/ipcam_controller.cpp \
 		player/src/ipcam_rtsp_rec.cpp \
 		player/src/ipcam_rtsp_play.cpp \

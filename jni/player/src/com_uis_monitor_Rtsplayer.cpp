@@ -78,59 +78,10 @@ ipcam_vdec *videoDecode4 = NULL;
 //	};
 //};
 
-void DisplayCb_1 (uint8_t* aData[], int aDataLen)
-{
-//	size_t offset = 0;
-//	unsigned fsize = (aDataLen*2)/3;
-//	//LOGV("DisplayCb callback -- display decoded framelength %d\n", aDataLen);
-//
-//	uint8_t *tmpbuf = new uint8_t[aDataLen];
-//	memset(tmpbuf, 0, aDataLen);
-//
-//	memcpy(tmpbuf, aData[0], size_t(fsize));
-//	offset += size_t(fsize);
-//	memcpy(tmpbuf+offset, aData[1], size_t(fsize/4));
-//	offset += size_t(fsize/4);
-//	memcpy(tmpbuf+offset, aData[2], size_t(fsize/4));
-//	offset += size_t(fsize/4);
-//
-//	if(renderer1 != NULL) {
-//		renderer1->render(tmpbuf,  aDataLen, NULL);
-//		//LOGV("Rendering CAM 1");
-//	}
-//	//fprintf(stderr, "*********total frame size %d, camID %d\n",offset,camID );
-//	free (tmpbuf);
-}
 
-void create_surfaces(int ID, int x, int y)
+void render_frame(uint8_t* aData[], int aDataLen)
 {
-//	if(ID==1)
-//	{
-//		//Create Surfaces
-//		client1 = new SurfaceComposerClient();
-//		client1->setOrientation(0, ISurfaceComposer::eOrientationDefault, 0);
-//		// create pushbuffer surface
-//		surface1 = client1->createSurface(getpid(), 0,	VIDEO_WIDTH,
-//														VIDEO_HEIGHT,
-//														PIXEL_FORMAT_UNKNOWN,
-//														ISurfaceComposer::ePushBuffers);
-//
-//		LOGD("Created SurfaceControl 1\n");
-//
-//		client1->openTransaction();
-//		surface1->setLayer(1500000);
-//		surface1->setPosition(x,y);
-//		client1->closeTransaction();
-//
-//		// get to the isurface
-//		isurface1 = Test::getISurface(surface1);
-//		LOGD("isurface = %p\n", isurface1.get());
-//
-//		renderer1 = new SoftwareRenderer(OMX_COLOR_FormatYUV420Planar, isurface1,
-//										VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_WIDTH, VIDEO_HEIGHT);
-//
-//		LOGD("///// Surface 1 Created ////// \n");
-//	}
+
 }
 
 jint Java_com_uis_monitor_Rtsplayer_CreateRec(JNIEnv *env, jobject obj,
@@ -144,8 +95,6 @@ jint Java_com_uis_monitor_Rtsplayer_CreateRec(JNIEnv *env, jobject obj,
 
 	LOGD("CAM ID %d \tURL: %s \t FILE: %s\n ", ID, rtspURL, RecFile);
 
-	create_surfaces(ID, x, y);
-	
 	switch(ID)
 	{
 		case 1:

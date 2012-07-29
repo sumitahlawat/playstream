@@ -22,12 +22,12 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
-AVCodec        *pCodec;
-AVCodecContext *pContext;
-AVFrame        *pFrame ,*out_pic;;
-unsigned char  *picBuffer;
-int 			picSize;
-struct SwsContext* img_convert_ctx;
+//AVCodec        *pCodec;
+//AVCodecContext *pContext;
+//AVFrame        *pFrame ,*out_pic;;
+//unsigned char  *picBuffer;
+//int 			picSize;
+//struct SwsContext* img_convert_ctx;
 
 void* StartPlay(void* arg);
 
@@ -368,7 +368,7 @@ DecoderSink::DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, cha
   fSubsession(subsession) {
 	fStreamId = strDup(streamId);
 	fReceiveBuffer = new u_int8_t[DECODER_SINK_RECEIVE_BUFFER_SIZE];
-	avcodec_init();
+	/*avcodec_init();
 	avcodec_register_all();
 	pCodec = avcodec_find_decoder (CODEC_ID_MPEG4);
 	if (!pCodec)
@@ -379,10 +379,10 @@ DecoderSink::DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, cha
 	pFrame = avcodec_alloc_frame();
 	pContext = avcodec_alloc_context();
 	pContext->bit_rate = 1000;  //temp value
-	/* resolution must be a multiple of two */
+	 resolution must be a multiple of two
 	pContext->width =  320;   //temp value width
 	pContext->height = 240;    //temp value height
-	/* frames per second */
+	 frames per second
 	pContext->time_base= (AVRational){1,25};
 	pContext->pix_fmt = PIX_FMT_YUV420P;  //old
 	pContext->pix_fmt = PIX_FMT_RGB24;    //for storing ppm's
@@ -394,18 +394,16 @@ DecoderSink::DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, cha
 
 	picBuffer = new uint8_t[picSize];
 
-	if (pCodec->capabilities & CODEC_CAP_TRUNCATED)
-	{
+	if (pCodec->capabilities & CODEC_CAP_TRUNCATED)	{
 		//We do not send one total frame at one time
 		pContext->flags |= CODEC_FLAG_TRUNCATED;
 		pContext->flags |= CODEC_FLAG_EMU_EDGE;
 	}
 
-	if (avcodec_open (pContext, pCodec) < 0)
-	{
+	if (avcodec_open (pContext, pCodec) < 0) {
 		LOGI( "Could not open video codec\n");
 	}
-	LOGI("InitMPEG4Dec complete\n");
+	LOGI("InitMPEG4Dec complete\n"); */
 }
 
 DecoderSink::~DecoderSink() {
@@ -428,7 +426,11 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
 		//decode data here
-		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+
+		//call decoder function from here : somehow :P
+//		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+
+
 	}
 	if (numTruncatedBytes > 0) envir() << " (with " << numTruncatedBytes << " bytes truncated)";
 	char uSecsStr[6+1]; // used to output the 'microseconds' part of the presentation time
@@ -439,77 +441,6 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 	}
 	// Then continue, to request the next frame of data:
 	continuePlaying();
-}
-
-void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
-	FILE *pFile;
-	char szFilename[32];
-	int  y;
-
-	// Open file
-	sprintf(szFilename, "/mnt/sdcard/ipcam1/frame%d.ppm", iFrame);
-	pFile=fopen(szFilename, "wb");
-	if(pFile==NULL)
-		return;
-
-	// Write header
-	fprintf(pFile, "P6\n%d %d\n255\n", width, height);
-
-	// Write pixel data
-	for(y=0; y<height; y++)
-		fwrite(pFrame->data[0]+y*pFrame->linesize[0], 1, width*3, pFile);
-
-	fclose(pFile);
-}
-
-int savep = 0;
-
-int DecoderSink::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
-{
-	int frame, gotPicture, len;
-	//	char buf[1024];
-	uint8_t *buf;
-	int numBytes=avpicture_get_size(PIX_FMT_RGB565, pContext->width, pContext->height);
-	buf=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
-	LOGI("%s : %d : bufferSize :%d\n",__func__,__LINE__,bufferSize);
-	AVPacket avpkt;
-	av_init_packet(&avpkt);
-
-	avpkt.size = bufferSize;
-	avpkt.data = inBuffer;
-
-	frame = 0;
-	while(avpkt.size > 0)
-	{
-		len = avcodec_decode_video2(pContext, pFrame, &gotPicture, &avpkt);
-		if (len < 0) {
-			LOGI("Error while decoding frame %d\n", frame);
-			return -1;
-		}
-		if (gotPicture) {
-			out_pic = avcodec_alloc_frame();
-			if (!out_pic)
-				return -1;
-			img_convert_ctx = sws_getContext(pContext->width, pContext->height, pContext->pix_fmt,
-					pContext->width, pContext->height, PIX_FMT_RGB565,SWS_BICUBIC, NULL, NULL, NULL);
-			if (!img_convert_ctx)
-				return -1;
-
-			avpicture_fill((AVPicture *)out_pic, buf, PIX_FMT_RGB565, pContext->width, pContext->height);
-			sws_scale(img_convert_ctx, pFrame->data, pFrame->linesize, 0, pContext->height, out_pic->data, out_pic->linesize);
-			sws_freeContext(img_convert_ctx);
-			img_convert_ctx = NULL;
-			savep++;
-			//			if((savep%15)==0)
-			//				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
-
-			//find a way to display now
-		}
-		avpkt.size -= len;
-		avpkt.data += len;
-		frame++;
-	}
-	return 0;
 }
 
 Boolean DecoderSink::continuePlaying() {

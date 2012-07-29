@@ -4,64 +4,65 @@
 #include "BasicUsageEnvironment.hh"
 #include "GroupsockHelper.hh"
 #include "liveMedia.hh"
+#include "ipcam_vdec.h"
 #include <pthread.h>
-//#include <utils/threads.h>
+
 class StreamClientState;
 class ourRTSPClient;
 class playRTSPClient;
 
 class ipcam_rtsp
 {
-	public:
-		unsigned short fVideoHeight;
-		unsigned short fVideoWidth;
-		unsigned fVideoFPS;
-		char* fCodecName;
-		char watchVariable;    ///< a flag to stop doEventLoop() set to nonzero will return from doEventLoop()
+public:
+	unsigned short fVideoHeight;
+	unsigned short fVideoWidth;
+	unsigned fVideoFPS;
+	char* fCodecName;
+	char watchVariable;    ///< a flag to stop doEventLoop() set to nonzero will return from doEventLoop()
 
-	public:
-		virtual int StartRecv ()=0;
-		virtual int Close ()=0;
+public:
+	virtual int StartRecv ()=0;
+	virtual int Close ()=0;
 
-		unsigned short videoWidth() const { return fVideoWidth; }
-		unsigned short videoHeight() const { return fVideoHeight; }
-		unsigned videoFPS() const { return fVideoFPS; }
-		char const* codecName() const { return fCodecName; }
-		
-		virtual ~ipcam_rtsp() { };
+	unsigned short videoWidth() const { return fVideoWidth; }
+	unsigned short videoHeight() const { return fVideoHeight; }
+	unsigned videoFPS() const { return fVideoFPS; }
+	char const* codecName() const { return fCodecName; }
 
-	public:
-		pthread_t rtsp_thread; ///< the thread hanlder of created RTSP thread
-		UsageEnvironment* env; ///< Specify the environment parameters
+	virtual ~ipcam_rtsp() { };
+
+public:
+	pthread_t rtsp_thread; ///< the thread hanlder of created RTSP thread
+	UsageEnvironment* env; ///< Specify the environment parameters
 };
 
 class ipcam_rtsp_rec :  public ipcam_rtsp
 {
-	public:
-		char* filename;
-		int fps;
-		
-	public:
-		int StartRecv ();
-		int Close ();
-		
-		int Init(char *url, char* filename, int fps);
-		ourRTSPClient* rtspClient;
-		ipcam_rtsp_rec ();
-		~ipcam_rtsp_rec ();
+public:
+	char* filename;
+	int fps;
+
+public:
+	int StartRecv ();
+	int Close ();
+
+	int Init(char *url, char* filename, int fps);
+	ourRTSPClient* rtspClient;
+	ipcam_rtsp_rec ();
+	~ipcam_rtsp_rec ();
 };
 
 
 class ipcam_rtsp_play :  public ipcam_rtsp
 {
-    public:
-		int StartRecv ();
-		int Close ();
+public:
+	int StartRecv ();
+	int Close ();
 
-		playRTSPClient* rtspClient;
-		int Init (char *url);
-		ipcam_rtsp_play ();
-		~ipcam_rtsp_play ();
+	playRTSPClient* rtspClient;
+	int Init (char *url);
+	ipcam_rtsp_play ();
+	~ipcam_rtsp_play ();
 };
 
 // Define a class to hold per-stream state that we maintain throughout each stream's lifetime:
@@ -120,31 +121,32 @@ public:
 
 class DecoderSink: public MediaSink {
 public:
-  static DecoderSink* createNew(UsageEnvironment& env,
-			      MediaSubsession& subsession, // identifies the kind of data that's being received
-			      char const* streamId = NULL); // identifies the stream itself (optional)
+	static DecoderSink* createNew(UsageEnvironment& env,
+			MediaSubsession& subsession, // identifies the kind of data that's being received
+			char const* streamId = NULL, // identifies the stream itself (optional)
+			ipcam_vdec* decoder=NULL);
 
 private:
-  DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId);
-    // called only by "createNew()"
-  virtual ~DecoderSink();
+	DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId ,ipcam_vdec *decoder);
+	// called only by "createNew()"
+	virtual ~DecoderSink();
 
-  static void afterGettingFrame(void* clientData, unsigned frameSize,
-                                unsigned numTruncatedBytes,
-				struct timeval presentationTime,
-                                unsigned durationInMicroseconds);
-  void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
-			 struct timeval presentationTime, unsigned durationInMicroseconds);
-  int DecVideo (unsigned char* pBuffer, unsigned int bufferSize);
-
-private:
-  // redefined virtual functions:
-  virtual Boolean continuePlaying();
+	static void afterGettingFrame(void* clientData, unsigned frameSize,
+			unsigned numTruncatedBytes,
+			struct timeval presentationTime,
+			unsigned durationInMicroseconds);
+	void afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
+			struct timeval presentationTime, unsigned durationInMicroseconds);
 
 private:
-  u_int8_t* fReceiveBuffer;
-  MediaSubsession& fSubsession;
-  char* fStreamId;
+	// redefined virtual functions:
+	virtual Boolean continuePlaying();
+
+private:
+	u_int8_t* fReceiveBuffer;
+	MediaSubsession& fSubsession;
+	char* fStreamId;
+	ipcam_vdec *decoder;
 };
 
 #endif // _IPCAM_RTSP_H_

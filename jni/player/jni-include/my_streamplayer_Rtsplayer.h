@@ -9,11 +9,27 @@ extern "C" {
 #endif
 /*
  * Class:     my_streamplayer_Rtsplayer
+ * Method:    native_gl_resize
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_native_1gl_1resize
+  (JNIEnv *, jclass, jint, jint);
+
+/*
+ * Class:     my_streamplayer_Rtsplayer
+ * Method:    native_gl_render
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_native_1gl_1render
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     my_streamplayer_Rtsplayer
  * Method:    CreateRec
- * Signature: (Ljava/lang/String;Ljava/lang/String;IIII)V
+ * Signature: (Landroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;IIII)V
  */
 JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_CreateRec
-  (JNIEnv *, jobject, jstring, jstring, jint, jint, jint, jint);
+  (JNIEnv *, jobject, jobject, jstring, jstring, jint, jint, jint, jint);
 
 /*
  * Class:     my_streamplayer_Rtsplayer

@@ -5,8 +5,10 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -22,8 +24,9 @@ public class PlaystreamActivity extends Activity {
 	private Button btn_play;
 	private Button btn_exit;
 	private EditText url_text;	
-	private GLSurfaceView surfaceView;
-
+	private MyGLSurfaceView surfaceView;
+	private Bitmap mBitmap;
+	Rtsplayer rtplayer = new Rtsplayer();
 	@Override 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -39,7 +42,10 @@ public class PlaystreamActivity extends Activity {
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");
 		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
-		final Rtsplayer player = new Rtsplayer();
+
+		//creating an RGB565 bitmap to render frames
+		mBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.RGB_565);
+		
 
 		btn_start = (Button) findViewById(R.id.button1);	
 		btn_start.setText("record");
@@ -48,8 +54,8 @@ public class PlaystreamActivity extends Activity {
 				btn_start.setEnabled(false);
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				player.CreateRec(url, recfile, 1, 10, 10, 30);
-				player.StartRec(1);
+				rtplayer.CreateRec(mBitmap, url, recfile, 1, 10, 10, 30);
+				rtplayer.StartRec(1);
 				btn_start.setEnabled(true);
 			}
 		});
@@ -59,11 +65,10 @@ public class PlaystreamActivity extends Activity {
 		btn_play.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_play.setEnabled(false);
-
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				player.CreateRec(url, recfile, 1, 10, 10, 30);
-				player.StartRec(1);
+				rtplayer.CreateRec(mBitmap, url, recfile, 1, 10, 10, 30);
+				rtplayer.StartRec(1);
 				btn_start.setEnabled(true);
 			}
 		});
@@ -73,7 +78,7 @@ public class PlaystreamActivity extends Activity {
 		btn_stop.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_stop.setEnabled(false);				
-				player.StopRec(1);
+				rtplayer.StopRec(1);
 				btn_stop.setEnabled(true);
 			}
 		});
@@ -86,8 +91,10 @@ public class PlaystreamActivity extends Activity {
 				finish();
 			}
 		});		
-		surfaceView = (GLSurfaceView) findViewById(R.id.glSurface);
-		surfaceView.setRenderer(new MyRenderer());
+		Log.v("Playstream", "On create done ");
+		surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
+		Log.v("Playstream", "On create done end");
+				
 	}
 }
 
@@ -95,31 +102,48 @@ public class PlaystreamActivity extends Activity {
 class MyGLSurfaceView extends GLSurfaceView {
 	MyRenderer mRenderer;
 
-	public MyGLSurfaceView(Context context) {
-		super(context);
+	public MyGLSurfaceView(Context context, AttributeSet attrs) {		
+		super(context, attrs);
+
+		Log.v("Playstream", "MyGLSurfaceView " + attrs.toString());
 		mRenderer = new MyRenderer();
 		setRenderer(mRenderer);
-	}
+		setFocusableInTouchMode(true);
+	}		
 
 	public boolean onTouchEvent(final MotionEvent event) {
-		queueEvent(new Runnable(){
-			public void run() {
-				
-			}});
-		return true;
-	}
+        queueEvent(new Runnable(){
+            public void run() {
+                mRenderer.setColor(event.getX() / getWidth(),
+                        event.getY() / getHeight(), 1.0f);
+            }});
+            return true;
+        }
 }
 
-class MyRenderer implements GLSurfaceView.Renderer {
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+class MyRenderer implements GLSurfaceView.Renderer {		
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) {				
 		// Do nothing special.
 	}
 
 	public void onSurfaceChanged(GL10 gl, int w, int h) {
+		Log.d("Playstream", "onSurfaceChanged " + w +"  "+ h);
 		gl.glViewport(0, 0, w, h);
+		//		Rtsplayer.native_gl_resize(w, h);		
 	}
 
 	public void onDrawFrame(GL10 gl) {
+		gl.glClearColor(mRed, mGreen, mBlue, 1.0f);
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 	}
+	public void setColor(float r, float g, float b) {
+		mRed = r;
+		mGreen = g;
+		mBlue = b;
+	}
+
+	private float mRed;
+	private float mGreen;
+	private float mBlue;
+
 }

@@ -2,6 +2,7 @@
 #define __ipcam_camera_H__
 
 #include "ipcam_controller.h"
+#include "ipcam_vdec.h"
 
 class ipcam_camera
 {
@@ -20,6 +21,7 @@ public:
 	ipcam_camera(char* URL, int ID, int frame_rate);
 	~ipcam_camera();
 
+	ipcam_vdec*		pVDec;
 	int init();
 	void deinit();
 	int play_connect();
