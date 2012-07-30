@@ -23,10 +23,10 @@ ipcam_vdec* ipcam_vdec::m_Decoder2=NULL;
 ipcam_vdec* ipcam_vdec::m_Decoder3=NULL;
 ipcam_vdec* ipcam_vdec::m_Decoder4=NULL;
 
-extern void DisplayCb_1 (uint8_t* aData[], int aDataLen);
-extern void DisplayCb_2 (uint8_t* aData[], int aDataLen);
-extern void DisplayCb_3 (uint8_t* aData[], int aDataLen);
-extern void DisplayCb_4 (uint8_t* aData[], int aDataLen);
+extern void DisplayCb_1 (AVFrame *Frame);
+extern void DisplayCb_2 (AVFrame *Frame);
+extern void DisplayCb_3 (AVFrame *Frame);
+extern void DisplayCb_4 (AVFrame *Frame);
 
 ipcam_vdec* ipcam_vdec::getInstance(int id)
 {
@@ -128,7 +128,7 @@ int ipcam_vdec::InitMPEG4Dec()
 	pContext->time_base= (AVRational){1,25};
 	pContext->pix_fmt = PIX_FMT_YUV420P;  //old
 	pContext->pix_fmt = PIX_FMT_RGB24;    //for storing ppm's
-	pContext->pix_fmt =PIX_FMT_RGB565;   //for glsurface
+	//pContext->pix_fmt =PIX_FMT_RGB565;   //for glsurface
 
 	//calculate picture size and allocate memory
 	picSize = avpicture_get_size(pContext->pix_fmt, pContext->width, pContext->height);
@@ -198,20 +198,22 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 			if (!out_pic)
 				return -1;
 			img_convert_ctx = sws_getContext(pContext->width, pContext->height, pContext->pix_fmt,
-					pContext->width, pContext->height, PIX_FMT_RGB565,SWS_BICUBIC, NULL, NULL, NULL);
+					pContext->width, pContext->height, pContext->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
 			if (!img_convert_ctx)
 				return -1;
 
-			avpicture_fill((AVPicture *)out_pic, buf, PIX_FMT_RGB565, pContext->width, pContext->height);
+			avpicture_fill((AVPicture *)out_pic, buf, pContext->pix_fmt, pContext->width, pContext->height);
 			sws_scale(img_convert_ctx, pFrame->data, pFrame->linesize, 0, pContext->height, out_pic->data, out_pic->linesize);
 			sws_freeContext(img_convert_ctx);
 			img_convert_ctx = NULL;
-			pCallback(out_pic->data, (pContext->width*pContext->height*2));
+			pCallback(out_pic);
 			savep++;
 			//			if((savep%15)==0)
 			//				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
 
 			//find a way to display now
+			av_free(out_pic);
+			out_pic = NULL;
 		}
 		avpkt.size -= len;
 		avpkt.data += len;

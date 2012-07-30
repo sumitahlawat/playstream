@@ -7,29 +7,22 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     my_streamplayer_Rtsplayer
- * Method:    native_gl_resize
- * Signature: (II)V
- */
-JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_native_1gl_1resize
-  (JNIEnv *, jclass, jint, jint);
 
 /*
- * Class:     my_streamplayer_Rtsplayer
- * Method:    native_gl_render
- * Signature: ()V
+ * Class:     my_streamplayer_Rtsplayer_
+ * Method:    nativeSetup
+ * Signature: (Ljava/lang/Object;)V
  */
-JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_native_1gl_1render
-  (JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_init
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     my_streamplayer_Rtsplayer
  * Method:    CreateRec
- * Signature: (Landroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;IIII)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;IIIILandroid/graphics/Bitmap;)V
  */
 JNIEXPORT void JNICALL Java_my_streamplayer_Rtsplayer_CreateRec
-  (JNIEnv *, jobject, jstring, jstring, jint, jint, jint, jint);
+  (JNIEnv *, jobject, jstring, jstring, jint, jint, jint, jint, jobject);
 
 /*
  * Class:     my_streamplayer_Rtsplayer

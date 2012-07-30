@@ -7,7 +7,7 @@ extern "C" {
 #include "libswscale/swscale.h"
 };
 
-typedef void (*DisplayCallback) (uint8_t* aData[], int aDataLen);
+typedef void (*DisplayCallback) (AVFrame *Frame);
 
 typedef struct {
 	unsigned int   bitRate;

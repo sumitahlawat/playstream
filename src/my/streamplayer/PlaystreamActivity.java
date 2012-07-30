@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 public class PlaystreamActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -23,10 +24,10 @@ public class PlaystreamActivity extends Activity {
 	private Button btn_stop;
 	private Button btn_play;
 	private Button btn_exit;
-	private EditText url_text;	
+	private EditText url_text;
 	private MyGLSurfaceView surfaceView;
 	private Bitmap mBitmap;
-	Rtsplayer rtplayer = new Rtsplayer();
+	Rtsplayer rtplayer = new Rtsplayer(this);
 	@Override 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,8 +45,8 @@ public class PlaystreamActivity extends Activity {
 		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
 		url_text.setText("rtsp://192.168.101.199/live.sdp");
 		//creating an RGB565 bitmap to render frames
-		mBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.RGB_565);
-		
+		mBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+
 		btn_start = (Button) findViewById(R.id.button1);	
 		btn_start.setText("record");
 		btn_start.setOnClickListener(new View.OnClickListener() {
@@ -53,7 +54,7 @@ public class PlaystreamActivity extends Activity {
 				btn_start.setEnabled(false);
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				rtplayer.CreateRec(url, recfile, 1, 10, 10, 30);
+				rtplayer.CreateRec(url, recfile, 1, 10, 10, 30 ,mBitmap);
 				rtplayer.StartRec(1);
 				btn_start.setEnabled(true);
 			}
@@ -66,7 +67,7 @@ public class PlaystreamActivity extends Activity {
 				btn_play.setEnabled(false);
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				rtplayer.CreateRec( url, recfile, 1, 10, 10, 30);
+				rtplayer.CreateRec( url, recfile, 1, 10, 10, 30, mBitmap);
 				rtplayer.StartRec(1);
 				btn_start.setEnabled(true);
 			}
@@ -92,10 +93,16 @@ public class PlaystreamActivity extends Activity {
 		});		
 		Log.v("Playstream", "On create done ");
 		surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
-		Log.v("Playstream", "On create done end");
-				
+		Log.v("Playstream", "On create done end");			
+	}
+	
+	public void showbitmap()
+	{
+		ImageView i = (ImageView)findViewById(R.id.frame);
+		i.setImageBitmap(mBitmap);
 	}
 }
+
 
 
 class MyGLSurfaceView extends GLSurfaceView {
@@ -111,13 +118,13 @@ class MyGLSurfaceView extends GLSurfaceView {
 	}		
 
 	public boolean onTouchEvent(final MotionEvent event) {
-        queueEvent(new Runnable(){
-            public void run() {
-                mRenderer.setColor(event.getX() / getWidth(),
-                        event.getY() / getHeight(), 1.0f);
-            }});
-            return true;
-        }
+		queueEvent(new Runnable(){
+			public void run() {
+				mRenderer.setColor(event.getX() / getWidth(),
+						event.getY() / getHeight(), 1.0f);
+			}});
+		return true;
+	}
 }
 
 class MyRenderer implements GLSurfaceView.Renderer {		

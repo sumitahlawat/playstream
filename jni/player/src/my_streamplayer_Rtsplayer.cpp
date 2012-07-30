@@ -18,26 +18,112 @@ ipcam_camera *MyIPCAM4 = NULL;
 
 ipcam_vdec *videoDecode1 = NULL;
 
+AndroidBitmapInfo  info;
 static int errorCam1 = 0;
+void* pixels;
+JavaVM *gJavaVM;
+jmethodID mid_cb_string;
+jclass      mClass;     // Reference to jtxRemSkt class
+jobject     mObject;    // Weak ref to jtxRemSkt Java object to call on
 
-void DisplayCb_1 (uint8_t* aData[], int aDataLen)
+void return_Message_to_Java(char * ch_msg);
+
+/*
+ * Write a frame worth of video (in pFrame) into the Android bitmap
+ * described by info using the raw pixel buffer.  It's a very inefficient
+ * draw routine, but it's easy to read. Relies on the format of the
+ * bitmap being 8bits per color component plus an 8bit alpha channel.
+ */
+
+static void fill_bitmap(AndroidBitmapInfo*  info, void *pixels, AVFrame *pFrame)
 {
-	LOGI("%s : %d  %d\n",__func__,__LINE__,aDataLen);
+	uint8_t *frameLine;
+
+	int  yy;
+	for (yy = 0; yy < info->height; yy++) {
+		uint8_t*  line = (uint8_t*)pixels;
+		frameLine = (uint8_t *)pFrame->data[0] + (yy * pFrame->linesize[0]);
+
+		int xx;
+		for (xx = 0; xx < info->width; xx++) {
+			int out_offset = xx * 4;
+			int in_offset = xx * 3;
+
+			line[out_offset] = frameLine[in_offset];
+			line[out_offset+1] = frameLine[in_offset+1];
+			line[out_offset+2] = frameLine[in_offset+2];
+			line[out_offset+3] = 0;
+		}
+		pixels = (char*)pixels + info->stride;
+	}
+}
+/**
+ * return message string to the Java side
+ *  @ch_mag char array of message
+ */
+void return_Message_to_Java(char * ch_msg)
+{
+	int status;
+	JNIEnv *env;
+	bool isAttached = false;
+
+	env=NULL;
+
+	status = gJavaVM->GetEnv((void **) &env, JNI_VERSION_1_4);
+	if(status < 0) {
+		LOGE("callback_handler: failed to get JNI environment, "
+				"assuming native thread");
+		status = gJavaVM->AttachCurrentThread(&env, NULL);
+		if(status < 0) {
+			LOGE("callback_handler: failed to attach "
+					"current thread");
+		}
+		isAttached = true;
+	}
+	jstring str_cb = env->NewStringUTF(ch_msg);
+	env->CallStaticVoidMethod(mClass, mid_cb_string, str_cb);
+	(env)->DeleteLocalRef(str_cb);
+
+	if(isAttached)
+		gJavaVM->DetachCurrentThread();}
+
+void DisplayCb_1 (AVFrame *Frame)
+{
+	LOGI("%s : %d\n",__func__,__LINE__);
+	//send data back to java side to display
+	fill_bitmap(&info, pixels, Frame);
+	return_Message_to_Java("disp");
 }
 
-void DisplayCb_2 (uint8_t* aData[], int aDataLen)
+void DisplayCb_2 (AVFrame *Frame)
 {
 	LOGI("display frame data after callback");
 }
 
-void DisplayCb_3 (uint8_t* aData[], int aDataLen)
+void DisplayCb_3 (AVFrame *Frame)
 {
 	LOGI("display frame data after callback");
 }
 
-void DisplayCb_4 (uint8_t* aData[], int aDataLen)
+void DisplayCb_4 (AVFrame *Frame)
 {
 	LOGI("display frame data after callback");
+}
+
+
+/*
+ * Class:     my_streamplayer_Rtsplayer
+ * Method:    nativeSetup
+ * Signature: (Ljava/lang/Object;)V
+ */
+void Java_my_streamplayer_Rtsplayer_init(JNIEnv *env,jobject thiz, jobject weak_this)
+{
+	LOGI("do init once");
+	jclass clazz = env->GetObjectClass(thiz);
+	mClass = (jclass)env->NewGlobalRef(clazz);
+	mObject  = env->NewGlobalRef(weak_this);
+	mid_cb_string = env->GetStaticMethodID(mClass, "rcmcallback_string","(Ljava/lang/String;)V");
+	return;
 }
 
 /*
@@ -46,13 +132,27 @@ void DisplayCb_4 (uint8_t* aData[], int aDataLen)
  * Signature: (Landroid/graphics/Bitmap;Ljava/lang/String;Ljava/lang/String;IIII)V
  */
 void Java_my_streamplayer_Rtsplayer_CreateRec
-(JNIEnv *env, jobject, jstring URL, jstring recfile, jint ID, jint x, jint y, jint frame_rate)
+(JNIEnv *env, jobject, jstring URL, jstring recfile, jint ID, jint x, jint y, jint frame_rate, jobject bitmap)
 {
 	jboolean isCopy;
 	char* rtspURL = (char*) env->GetStringUTFChars(URL, &isCopy);
 	char* RecFile = (char*) env->GetStringUTFChars(recfile, &isCopy);
-
 	LOGI("CAM ID %d \tURL: %s \t FILE: %s\n ", ID, rtspURL, RecFile);
+
+	int ret;
+	//mid_cb_string = env->GetStaticMethodID(mClass, "rcmcallback_string","(Ljava/lang/String;)V");
+
+
+	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+		LOGI("AndroidBitmap_getInfo() failed ! error=%d", ret);
+		return;
+	}
+	LOGI("Checked on the bitmap");
+
+	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+		LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+	}
+	LOGI("Grabbed the pixels");
 
 	switch(ID)
 	{
@@ -145,4 +245,68 @@ void  Java_my_streamplayer_Rtsplayer_DestroyRec
 		LOGE("INVALID CAM-ID %d", ID);
 		break;
 	}
+}
+
+
+
+static const char *classPathName = "my/streamplayer/Rtsplayer";
+
+static JNINativeMethod methods[] = {
+		{"CreateRec", "(Ljava/lang/String;Ljava/lang/String;IIIILandroid/graphics/Bitmap;)V", (void *)Java_my_streamplayer_Rtsplayer_CreateRec},
+		{"StartRec", "(I)V",	(void *)Java_my_streamplayer_Rtsplayer_StartRec},
+		{"StopRec", "(I)V", (void *)Java_my_streamplayer_Rtsplayer_StopRec},
+		{"DestroyRec", "(I)V", (void *)Java_my_streamplayer_Rtsplayer_DestroyRec},
+};
+
+/*
+ * Register several native methods for one class.
+ */
+static int registerNativeMethods(JNIEnv* env, const char* className,
+		JNINativeMethod* gMethods, int numMethods)
+{
+	jclass clazz;
+
+	clazz = env->FindClass(className);
+	if (clazz == NULL) {
+		LOGE("Native registration unable to find class '%s'", className);
+		return JNI_FALSE;
+	}
+	if (env->RegisterNatives(clazz, gMethods, numMethods) < 0) {
+		LOGE("RegisterNatives failed for '%s'", className);
+		return JNI_FALSE;
+	}
+
+	return JNI_TRUE;
+}
+
+static int registerNatives(JNIEnv* env)
+{
+	if (!registerNativeMethods(env, classPathName,
+			methods, sizeof(methods) / sizeof(methods[0]))) {
+		return JNI_FALSE;
+	}
+	return JNI_TRUE;
+}
+
+jint JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+	JNIEnv *env;
+	gJavaVM = vm;
+	int result;
+
+	LOGI("JNI_OnLoad called");
+	if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+		LOGE("(JNI_OnLoad()) .... Failed to get the environment using GetEnv()");
+		return -1;
+	}
+
+	if (registerNatives(env) != JNI_TRUE) {
+		LOGE("ERROR: registerNatives failed .... (JNI_OnLoad())");
+		goto bail;
+	}
+
+	result = JNI_VERSION_1_4;
+
+	bail:
+	return result;
 }
