@@ -55,7 +55,14 @@
         android:textSize="20sp" />
     <!-- View Container -->
 
-    <my.streamplayer.MyGLSurfaceView
+    <ImageView
+        android:id="@+id/frame"
+        android:layout_width="320px"
+        android:layout_height="240px" >
+    </ImageView>
+
+    <!--
+         <my.streamplayer.MyGLSurfaceView
         android:id="@+id/glSurface"
         android:layout_width="320dp"
         android:layout_height="240dp"
@@ -63,12 +70,6 @@
         android:longClickable="true"
         android:minHeight="240dp"
         android:minWidth="320dp" />
-
-    <ImageView
-        android:id="@+id/frame"
-        android:layout_width="320px"
-        android:layout_height="240px" >
-        
-    </ImageView>
+    -->
 
 </LinearLayout>

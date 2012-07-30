@@ -25,7 +25,7 @@ public class PlaystreamActivity extends Activity {
 	private Button btn_play;
 	private Button btn_exit;
 	private EditText url_text;
-	private MyGLSurfaceView surfaceView;
+	//private MyGLSurfaceView surfaceView;
 	private Bitmap mBitmap;
 	Rtsplayer rtplayer = new Rtsplayer(this);
 	@Override 
@@ -82,7 +82,7 @@ public class PlaystreamActivity extends Activity {
 				btn_stop.setEnabled(true);
 			}
 		});
-
+ 
 		btn_exit = (Button) findViewById(R.id.button2);
 		btn_exit.setText("Quit");
 		btn_exit.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +92,7 @@ public class PlaystreamActivity extends Activity {
 			}
 		});		
 		Log.v("Playstream", "On create done ");
-		surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
+	//	surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
 		Log.v("Playstream", "On create done end");			
 	}
 	
