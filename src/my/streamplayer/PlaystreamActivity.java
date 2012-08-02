@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 public class PlaystreamActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -25,6 +26,8 @@ public class PlaystreamActivity extends Activity {
 	private Button btn_play;
 	private Button btn_exit;
 	private EditText url_text;
+	private EditText Xres;
+	private EditText Yres;
 	//private MyGLSurfaceView surfaceView;
 	private Bitmap mBitmap;
 	Rtsplayer rtplayer = new Rtsplayer(this);
@@ -40,36 +43,41 @@ public class PlaystreamActivity extends Activity {
 		Log.v("Playstream", "height = "+ display.getHeight());
 		Log.v("Playstream", "width = "+ display.getWidth());     
 
+		Xres = (EditText) findViewById(R.id.editTextxres);
+		Xres.setText("320");
+		Yres = (EditText) findViewById(R.id.editTextyres);
+		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
-		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");
-		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
+		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
 		url_text.setText("rtsp://192.168.101.199/live.sdp");
 		//creating an RGB565 bitmap to render frames
-		mBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
 
-		btn_start = (Button) findViewById(R.id.button1);	
-		btn_start.setText("record");
-		btn_start.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				btn_start.setEnabled(false);
-				String recfile = "/mnt/sdcard/ipcam1/record.mov";
-				String url = url_text.getText().toString();
-				rtplayer.CreateRec(url, recfile, 1, 10, 10, 30 ,mBitmap);
-				rtplayer.StartRec(1);
-				btn_start.setEnabled(true);
-			}
-		});
+		final int X=Integer.parseInt(Xres.getText().toString());
+		final int Y=Integer.parseInt(Yres.getText().toString());
+
+		Log.v("Playstream", "imageview scaling done");
 
 		btn_play = (Button) findViewById(R.id.button4);
 		btn_play.setText("Play");
 		btn_play.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_play.setEnabled(false);
+
+				mBitmap = Bitmap.createBitmap(Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), Bitmap.Config.ARGB_8888);
+
+				ImageView image = (ImageView)findViewById(R.id.frame);
+				LinearLayout layout = (LinearLayout)findViewById(R.id.rootid);
+				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()));
+				image.setLayoutParams(params);
+				image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+				Log.v("Playstream", "image resize : " + image.getWidth() + "  "+image.getHeight());
+				Log.v("Playstream", "bitmap resize : " + mBitmap.getWidth() + "  "+mBitmap.getHeight());
 				String recfile = "/mnt/sdcard/ipcam1/record.mov";
 				String url = url_text.getText().toString();
-				rtplayer.CreateRec( url, recfile, 1, 10, 10, 30, mBitmap);
+				rtplayer.CreateRec(url, recfile, 1, Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), 30 ,mBitmap);
 				rtplayer.StartRec(1);
-				btn_start.setEnabled(true);
+				btn_play.setEnabled(true);
 			}
 		});
 
@@ -82,7 +90,7 @@ public class PlaystreamActivity extends Activity {
 				btn_stop.setEnabled(true);
 			}
 		});
- 
+
 		btn_exit = (Button) findViewById(R.id.button2);
 		btn_exit.setText("Quit");
 		btn_exit.setOnClickListener(new View.OnClickListener() {
@@ -92,18 +100,16 @@ public class PlaystreamActivity extends Activity {
 			}
 		});		
 		Log.v("Playstream", "On create done ");
-	//	surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
+		//	surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
 		Log.v("Playstream", "On create done end");			
 	}
-	
+
 	public void showbitmap()
-	{
+	{		
 		ImageView i = (ImageView)findViewById(R.id.frame);
 		i.setImageBitmap(mBitmap);
 	}
 }
-
-
 
 class MyGLSurfaceView extends GLSurfaceView {
 	MyRenderer mRenderer;

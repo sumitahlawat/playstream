@@ -2,9 +2,6 @@
 
 #undef PixelFormat
 
-#define VIDEO_WIDTH		320
-#define VIDEO_HEIGHT	240
-
 #include "ipcam_vdec.h"
 #include "ipcam_camera.h"
 #include "player.h"
@@ -71,8 +68,7 @@ void return_Message_to_Java(char * ch_msg)
 
 	status = gJavaVM->GetEnv((void **) &env, JNI_VERSION_1_4);
 	if(status < 0) {
-		LOGE("callback_handler: failed to get JNI environment, "
-				"assuming native thread");
+//	LOGE("callback_handler: failed to get JNI environment, "				"assuming native thread");
 		status = gJavaVM->AttachCurrentThread(&env, NULL);
 		if(status < 0) {
 			LOGE("callback_handler: failed to attach "
@@ -161,8 +157,9 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		MyIPCAM1->init();      // initialize ring buffers
 		MyIPCAM1->set_recFile(RecFile);
 
-		//create FFMPEG Decoder
+		//create FFMPEG Decoder - must be getting created here
 		videoDecode1 = ipcam_vdec::getInstance(1);
+		videoDecode1->setparam(x, y);
 		MyIPCAM1->pVDec = videoDecode1;
 
 		usleep (1000);
@@ -171,7 +168,7 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		errorCam1 = MyIPCAM1->play_connect();
 		//	MyIPCAM1->rec_connect();
 
-		LOGD("IPCAM %d errorCam1 %d\n", ID, errorCam1);
+		LOGD("IPCAM %d errorCam1 %d  widthframe : %d, heightframe =%d \n", ID, errorCam1 , x, y);
 		break;
 
 	default:

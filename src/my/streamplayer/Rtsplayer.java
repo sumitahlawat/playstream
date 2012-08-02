@@ -25,9 +25,8 @@ public class Rtsplayer {
 				case RCM_CB_string:
 					try {
 						String mystr= (String) msg.obj;            	   
-						Log.d("Playstream","CB_string   env: " + String.valueOf(msg.arg1)+"  string: " +mystr);
-						mainActivity.showbitmap();
-//						PlaystreamActivity.display();
+//						Log.d("Playstream","CB_string   env: " + String.valueOf(msg.arg1)+"  string: " +mystr);
+						mainActivity.showbitmap();					
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

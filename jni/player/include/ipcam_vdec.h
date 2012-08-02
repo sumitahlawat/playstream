@@ -21,12 +21,12 @@ typedef struct {
 class ipcam_vdec
 {
 private:
-	MPEG_DECODING_PRAMS_t   mpgParm;
+
 	DisplayCallback pCallback;
 	int videoWindow;
 	unsigned int framesize;
 
-	ipcam_vdec (int camID, int width, int height);
+	ipcam_vdec (int camID);
 	~ipcam_vdec ();
 
 	static ipcam_vdec* m_Decoder1;
@@ -42,8 +42,11 @@ public:
 	int 			picSize;
 	struct SwsContext* img_convert_ctx;
 
+	MPEG_DECODING_PRAMS_t   mpgParm;
+
 	static ipcam_vdec* getInstance(int camID);
 
+	void setparam(int vwidth, int vheight);
 	int InitMPEG4Dec ();
 	int DecVideo (unsigned char* pBuffer, unsigned int bufferSize);
 };

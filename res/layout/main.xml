@@ -32,6 +32,26 @@
             android:layout_gravity="center"
             android:layout_marginLeft="40dp"
             android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/editTextxres"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="40dp"
+            android:ems="10"
+            android:inputType="number"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/editTextyres"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="40dp"
+            android:ems="10"
+            android:inputType="number"
+            android:textSize="20sp" />
     </LinearLayout>
 
     <EditText
@@ -55,12 +75,18 @@
         android:textSize="20sp" />
     <!-- View Container -->
 
-    <ImageView
-        android:id="@+id/frame"
-        android:layout_width="320px"
-        android:layout_height="240px" >
-    </ImageView>
+    <LinearLayout
+        android:id="@+id/rootid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp" >
 
+        <ImageView
+            android:id="@+id/frame"
+            android:layout_width="320px"
+            android:layout_height="240px" >
+        </ImageView>
+    </LinearLayout>
     <!--
          <my.streamplayer.MyGLSurfaceView
         android:id="@+id/glSurface"

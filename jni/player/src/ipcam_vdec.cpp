@@ -15,8 +15,6 @@
 #include "ipcam_vdec.h"
 #include "player.h"
 
-#define VIDEO_WIDTH		320
-#define VIDEO_HEIGHT	240
 
 ipcam_vdec* ipcam_vdec::m_Decoder1=NULL;
 ipcam_vdec* ipcam_vdec::m_Decoder2=NULL;
@@ -34,33 +32,33 @@ ipcam_vdec* ipcam_vdec::getInstance(int id)
 	{
 	case 1:
 		if (!m_Decoder1)
-			m_Decoder1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
+			m_Decoder1 = new ipcam_vdec(1);
 		return m_Decoder1;
 		break;
 	case 2:
 		if (!m_Decoder2)
-			m_Decoder2 = new ipcam_vdec(2, VIDEO_WIDTH, VIDEO_HEIGHT);
+			m_Decoder2 = new ipcam_vdec(2);
 		return m_Decoder2;
 		break;
 	case 3:
 		if (!m_Decoder3)
-			m_Decoder3 = new ipcam_vdec(3, VIDEO_WIDTH, VIDEO_HEIGHT);
+			m_Decoder3 = new ipcam_vdec(3);
 		return m_Decoder3;
 		break;
 	case 4:
 		if (!m_Decoder4)
-			m_Decoder4 = new ipcam_vdec(4, VIDEO_WIDTH, VIDEO_HEIGHT);
+			m_Decoder4 = new ipcam_vdec(4);
 		return m_Decoder4;
 		break;
 	default:
 		if (!m_Decoder1)
-			m_Decoder1 = new ipcam_vdec(1, VIDEO_WIDTH, VIDEO_HEIGHT);
+			m_Decoder1 = new ipcam_vdec(1);
 		return m_Decoder1;
 		break;
 	}
 }
 
-ipcam_vdec :: ipcam_vdec(int camID, int width, int height)
+ipcam_vdec :: ipcam_vdec(int camID)
 {
 	LOGI("Construct video decoder, camID = %d\n", camID);
 	// init pointers
@@ -86,13 +84,6 @@ ipcam_vdec :: ipcam_vdec(int camID, int width, int height)
 		pCallback = &DisplayCb_1;
 		break;
 	}
-
-	mpgParm.bitRate = 1000;
-	mpgParm.frameRate = 15;
-	mpgParm.width = width;
-	mpgParm.height = height;
-	mpgParm.streamDelay = 0;
-
 	videoWindow = camID;
 }
 
@@ -106,6 +97,15 @@ ipcam_vdec::~ipcam_vdec()
 		av_free (pContext);
 	}
 	free(picBuffer);
+}
+
+void ipcam_vdec::setparam(int vwidth, int vheight)
+{
+	mpgParm.bitRate = 1000;
+	mpgParm.frameRate = 15;
+	mpgParm.width = vwidth;
+	mpgParm.height = vheight;
+	mpgParm.streamDelay = 0;
 }
 
 int ipcam_vdec::InitMPEG4Dec()
@@ -122,8 +122,8 @@ int ipcam_vdec::InitMPEG4Dec()
 	pContext = avcodec_alloc_context();
 	pContext->bit_rate = 1000;  //temp value
 	/* resolution must be a multiple of two */
-	pContext->width =  320;   //temp value width
-	pContext->height = 240;    //temp value height
+	pContext->width =  mpgParm.width;   //temp value width
+	pContext->height = mpgParm.height;    //temp value height
 	/* frames per second */
 	pContext->time_base= (AVRational){1,25};
 	pContext->pix_fmt = PIX_FMT_YUV420P;  //old
@@ -156,6 +156,8 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 	char szFilename[32];
 	int  y;
 
+	LOGI("Save Frame %d\n", iFrame);
+
 	// Open file
 	sprintf(szFilename, "/mnt/sdcard/ipcam1/frame%d.ppm", iFrame);
 	pFile=fopen(szFilename, "wb");
@@ -174,6 +176,7 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 
 int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 {
+	LOGI("%s : %d\n",__func__,__LINE__);
 	int frame, gotPicture, len;
 	//	char buf[1024];
 	uint8_t *buf;
@@ -208,8 +211,8 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 			img_convert_ctx = NULL;
 			pCallback(out_pic);
 			savep++;
-			//			if((savep%15)==0)
-			//				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
+			if((savep%15)==0)
+				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
 
 			//find a way to display now
 			av_free(out_pic);

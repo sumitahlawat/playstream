@@ -97,5 +97,3 @@ void *ipcam_controller::StartIPCAMRx (void *arg)
     LOGI ( "StartIPCAMRx() completed\n");
 	return 0;
 }
-
-
