@@ -85,7 +85,7 @@ void return_Message_to_Java(char * ch_msg)
 
 void DisplayCb_1 (AVFrame *Frame)
 {
-	LOGI("%s : %d\n",__func__,__LINE__);
+//	LOGI("%s : %d\n",__func__,__LINE__);
 	//send data back to java side to display
 	fill_bitmap(&info, pixels, Frame);
 	return_Message_to_Java("disp");

@@ -127,7 +127,7 @@ int ipcam_vdec::InitMPEG4Dec()
 	/* frames per second */
 	pContext->time_base= (AVRational){1,25};
 	pContext->pix_fmt = PIX_FMT_YUV420P;  //old
-	pContext->pix_fmt = PIX_FMT_RGB24;    //for storing ppm's
+	//	pContext->pix_fmt = PIX_FMT_RGB24;    //for storing ppm's
 	//pContext->pix_fmt =PIX_FMT_RGB565;   //for glsurface
 
 	//calculate picture size and allocate memory
@@ -180,7 +180,7 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 	int frame, gotPicture, len;
 	//	char buf[1024];
 	uint8_t *buf;
-	int numBytes=avpicture_get_size(PIX_FMT_RGB565, pContext->width, pContext->height);
+	int numBytes=avpicture_get_size(PIX_FMT_RGB24, pContext->width, pContext->height);
 	buf=(uint8_t *)av_malloc(numBytes*sizeof(uint8_t));
 	AVPacket avpkt;
 	av_init_packet(&avpkt);
@@ -201,11 +201,11 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 			if (!out_pic)
 				return -1;
 			img_convert_ctx = sws_getContext(pContext->width, pContext->height, pContext->pix_fmt,
-					pContext->width, pContext->height, pContext->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
+					pContext->width, pContext->height, PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
 			if (!img_convert_ctx)
 				return -1;
 
-			avpicture_fill((AVPicture *)out_pic, buf, pContext->pix_fmt, pContext->width, pContext->height);
+			avpicture_fill((AVPicture *)out_pic, buf, PIX_FMT_RGB24, pContext->width, pContext->height);
 			sws_scale(img_convert_ctx, pFrame->data, pFrame->linesize, 0, pContext->height, out_pic->data, out_pic->linesize);
 			sws_freeContext(img_convert_ctx);
 			img_convert_ctx = NULL;
