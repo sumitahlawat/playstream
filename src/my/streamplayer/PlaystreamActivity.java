@@ -1,5 +1,8 @@
 package my.streamplayer;
 
+import java.io.FileOutputStream;
+import java.util.Calendar;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -21,7 +24,7 @@ import android.widget.LinearLayout;
 public class PlaystreamActivity extends Activity {
 	/** Called when the activity is first created. */
 
-	private Button btn_start;
+	private Button btn_save;
 	private Button btn_stop;
 	private Button btn_play;
 	private Button btn_exit;
@@ -50,10 +53,6 @@ public class PlaystreamActivity extends Activity {
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
 		url_text.setText("rtsp://192.168.101.199/live.sdp");
-		//creating an RGB565 bitmap to render frames
-
-		final int X=Integer.parseInt(Xres.getText().toString());
-		final int Y=Integer.parseInt(Yres.getText().toString());
 
 		Log.v("Playstream", "imageview scaling done");
 
@@ -78,6 +77,22 @@ public class PlaystreamActivity extends Activity {
 				rtplayer.CreateRec(url, recfile, 1, Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), 30 ,mBitmap);
 				rtplayer.StartRec(1);
 				btn_play.setEnabled(true);
+			}
+		});
+
+		btn_save = (Button) findViewById(R.id.button1);	
+		btn_save.setText("Snap");
+		btn_save.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				btn_save.setEnabled(false);
+				String filename= "/mnt/sdcard/ipcam1/"+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + Calendar.getInstance().get(Calendar.MINUTE)+Calendar.getInstance().get(Calendar.SECOND) +".jpg";
+				try {
+					FileOutputStream out = new FileOutputStream(filename);
+					mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				btn_save.setEnabled(true);
 			}
 		});
 

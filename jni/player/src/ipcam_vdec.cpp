@@ -176,7 +176,7 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 
 int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 {
-	LOGI("%s : %d\n",__func__,__LINE__);
+//	LOGI("%s : %d\n",__func__,__LINE__);
 	int frame, gotPicture, len;
 	//	char buf[1024];
 	uint8_t *buf;
@@ -211,8 +211,8 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 			img_convert_ctx = NULL;
 			pCallback(out_pic);
 			savep++;
-			if((savep%15)==0)
-				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
+//			if((savep%15)==0)
+//				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
 
 			//find a way to display now
 			av_free(out_pic);
