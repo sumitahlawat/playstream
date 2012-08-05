@@ -1,5 +1,6 @@
 package my.streamplayer;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Calendar;
 
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -20,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 public class PlaystreamActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -56,6 +59,11 @@ public class PlaystreamActivity extends Activity {
 
 		Log.v("Playstream", "imageview scaling done");
 
+		
+		File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"ipcam");
+		directory.mkdirs();
+
+		
 		btn_play = (Button) findViewById(R.id.button4);
 		btn_play.setText("Play");
 		btn_play.setOnClickListener(new View.OnClickListener() {
@@ -72,7 +80,7 @@ public class PlaystreamActivity extends Activity {
 
 				Log.v("Playstream", "image resize : " + image.getWidth() + "  "+image.getHeight());
 				Log.v("Playstream", "bitmap resize : " + mBitmap.getWidth() + "  "+mBitmap.getHeight());
-				String recfile = "/mnt/sdcard/ipcam1/record.mov";
+				String recfile = Environment.getExternalStorageDirectory().toString()+"/ipcam/record.mov";
 				String url = url_text.getText().toString();
 				rtplayer.CreateRec(url, recfile, 1, Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), 30 ,mBitmap);
 				rtplayer.StartRec(1);
@@ -85,13 +93,14 @@ public class PlaystreamActivity extends Activity {
 		btn_save.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_save.setEnabled(false);
-				String filename= "/mnt/sdcard/ipcam1/"+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + Calendar.getInstance().get(Calendar.MINUTE)+Calendar.getInstance().get(Calendar.SECOND) +".jpg";
+				String filename= Environment.getExternalStorageDirectory().toString()+"/ipcam/"+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + Calendar.getInstance().get(Calendar.MINUTE)+Calendar.getInstance().get(Calendar.SECOND) +".jpg";
 				try {
 					FileOutputStream out = new FileOutputStream(filename);
 					mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				Toast.makeText(getApplicationContext(), "screenshot saved to "+filename, Toast.LENGTH_LONG).show();
 				btn_save.setEnabled(true);
 			}
 		});
