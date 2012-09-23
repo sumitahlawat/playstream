@@ -10,6 +10,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,15 +29,19 @@ public class PlaystreamActivity extends Activity {
 	/** Called when the activity is first created. */
 
 	private Button btn_save;
-	private Button btn_stop;
-	private Button btn_play;
+	private Button btn_stop;	
 	private Button btn_exit;
 	private EditText url_text;
 	private EditText Xres;
 	private EditText Yres;
 	//private MyGLSurfaceView surfaceView;
-	private Bitmap mBitmap;
+	private Bitmap mBitmap1;
+	private Bitmap mBitmap2;
+	private Bitmap mBitmap3;
+	private Bitmap mBitmap4;
 	Rtsplayer rtplayer = new Rtsplayer(this);
+	private Button btn_play2;
+	private Button btn_play1;
 	@Override 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,48 +60,77 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://192.168.101.199/live.sdp");
+		url_text.setText("rtsp://192.168.101.199/");
 
 		Log.v("Playstream", "imageview scaling done");
 
-		
+
 		File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"ipcam");
 		directory.mkdirs();
 
-		
-		btn_play = (Button) findViewById(R.id.button4);
-		btn_play.setText("Play");
-		btn_play.setOnClickListener(new View.OnClickListener() {
+		ImageView image = (ImageView)findViewById(R.id.frame1);
+		image.setBackgroundColor(Color.GREEN);		
+		ImageView image2 = (ImageView)findViewById(R.id.frame2);
+		image2.setBackgroundColor(Color.BLUE);
+
+		btn_play1 = (Button) findViewById(R.id.button4);
+		btn_play1.setText("Play1");
+		btn_play1.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				btn_play.setEnabled(false);
+				btn_play1.setEnabled(false);
 
-				mBitmap = Bitmap.createBitmap(Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), Bitmap.Config.ARGB_8888);
+				mBitmap1 = Bitmap.createBitmap(Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), Bitmap.Config.ARGB_8888);
 
-				ImageView image = (ImageView)findViewById(R.id.frame);
-				LinearLayout layout = (LinearLayout)findViewById(R.id.rootid);
+				ImageView image = (ImageView)findViewById(R.id.frame1);
+				image.setBackgroundColor(Color.BLACK);
+				LinearLayout layout = (LinearLayout)findViewById(R.id.rootid1);
 				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()));
 				image.setLayoutParams(params);
 				image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
 				Log.v("Playstream", "image resize : " + image.getWidth() + "  "+image.getHeight());
-				Log.v("Playstream", "bitmap resize : " + mBitmap.getWidth() + "  "+mBitmap.getHeight());
-				String recfile = Environment.getExternalStorageDirectory().toString()+"/ipcam/record.mov";
-				String url = url_text.getText().toString();
-				rtplayer.CreateRec(url, recfile, 1, Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), 30 ,mBitmap);
+				Log.v("Playstream", "bitmap resize : " + mBitmap1.getWidth() + "  "+mBitmap1.getHeight());
+				String recfile = Environment.getExternalStorageDirectory().toString()+"/ipcam/record1.mov";
+				String url = url_text.getText().toString()+"live.sdp";
+				rtplayer.CreateRec(url, recfile, 1, Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), 30 ,mBitmap1);
 				rtplayer.StartRec(1);
-				btn_play.setEnabled(true);
+				btn_play1.setEnabled(true);
+			}
+		});
+
+		btn_play2 = (Button) findViewById(R.id.button5);
+		btn_play2.setText("Play2");
+		btn_play2.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				btn_play2.setEnabled(false);
+
+				mBitmap2 = Bitmap.createBitmap(176, 144, Bitmap.Config.ARGB_8888);
+				ImageView image = (ImageView)findViewById(R.id.frame2);
+				image.setBackgroundColor(Color.BLACK);
+				LinearLayout layout = (LinearLayout)findViewById(R.id.rootid2);
+				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(176, 144);
+				image.setLayoutParams(params);
+				image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+				Log.v("Playstream", "image resize : " + image.getWidth() + "  "+image.getHeight());
+				Log.v("Playstream", "bitmap resize : " + mBitmap1.getWidth() + "  "+mBitmap1.getHeight());
+				String recfile = Environment.getExternalStorageDirectory().toString()+"/ipcam/record2.mov";
+				String url = url_text.getText().toString()+"live2.sdp";
+				rtplayer.CreateRec(url, recfile, 2, 176, 144, 30 ,mBitmap1);
+				rtplayer.StartRec(2);
+				btn_play2.setEnabled(true);
 			}
 		});
 
 		btn_save = (Button) findViewById(R.id.button1);	
-		btn_save.setText("Snap");
+		btn_save.setText("Snap1");
 		btn_save.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_save.setEnabled(false);
 				String filename= Environment.getExternalStorageDirectory().toString()+"/ipcam/"+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + Calendar.getInstance().get(Calendar.MINUTE)+Calendar.getInstance().get(Calendar.SECOND) +".jpg";
 				try {
 					FileOutputStream out = new FileOutputStream(filename);
-					mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+					mBitmap1.compress(Bitmap.CompressFormat.JPEG, 90, out);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -111,6 +145,11 @@ public class PlaystreamActivity extends Activity {
 			public void onClick(View v) {
 				btn_stop.setEnabled(false);				
 				rtplayer.StopRec(1);
+				ImageView image = (ImageView)findViewById(R.id.frame1);
+				image.setBackgroundColor(Color.GREEN);
+				rtplayer.StopRec(2);
+				ImageView image2 = (ImageView)findViewById(R.id.frame2);
+				image2.setBackgroundColor(Color.BLUE);
 				btn_stop.setEnabled(true);
 			}
 		});
@@ -120,18 +159,33 @@ public class PlaystreamActivity extends Activity {
 		btn_exit.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				btn_exit.setEnabled(false);
+				rtplayer.StopRec(1);
+				rtplayer.StopRec(2);
 				finish();
 			}
 		});		
-		Log.v("Playstream", "On create done ");
-		//	surfaceView = (MyGLSurfaceView) findViewById(R.id.glSurface);
-		Log.v("Playstream", "On create done end");			
 	}
 
-	public void showbitmap()
+	public void showbitmap1()
 	{		
-		ImageView i = (ImageView)findViewById(R.id.frame);
-		i.setImageBitmap(mBitmap);
+		ImageView i = (ImageView)findViewById(R.id.frame1);
+		i.setImageBitmap(mBitmap1);
+	}
+
+	public void showbitmap2() {
+		// TODO Auto-generated method stub
+		ImageView i = (ImageView)findViewById(R.id.frame2);
+		i.setImageBitmap(mBitmap2);
+	}
+
+	public void showbitmap3() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void showbitmap4() {
+		// TODO Auto-generated method stub
+
 	}
 }
 

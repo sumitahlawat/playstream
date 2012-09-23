@@ -7,15 +7,15 @@
 class ipcam_camera
 {
 private:
-	ipcam_controller*	pIpCam;
-	char*			url;
-	char*			recfilename;
-	int 			fps;
+	ipcam_controller* pIpCam;
+	char* url;
+	char* recfilename;
+	int fps;
 
 public:
-	int 			camID;
-	int				isPlaying;
-	int				isRecording;
+	int camID;
+	int	isPlaying;
+	int	isRecording;
 
 public:
 	ipcam_camera(char* URL, int ID, int frame_rate);

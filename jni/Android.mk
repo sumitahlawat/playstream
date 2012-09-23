@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:= libBasicUsageEnvironment
 
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS) $(LOCAL_PATH)/include $(LOCAL_PATH)/UsageEnvironment/include $(LOCAL_PATH)/groupsock/include $(LOCAL_PATH)/liveMedia $(LOCAL_PATH)/BasicUsageEnvironment/include
-LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1 -DANDROID
+LOCAL_CFLAGS := -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Wall -DBSD=1 -DANDROID -llog
 
 #LOCAL_CFLAGS := -fno-rtti -fno-exceptions
 

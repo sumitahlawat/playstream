@@ -81,19 +81,3 @@ int ipcam_controller::CloseMedia_Rec ()
 	IPCAM_rtsp_rec->Close();	
 	return 1;
 }
-
-void *ipcam_controller::StartIPCAMTx (void *arg)
-{
-    LOGI ( "Enter StartIPCAMTx()\n");
-    ipcam_controller * IPCAM_controller = (ipcam_controller *)arg;
-    LOGI ( "StartIPCAMTx() completed\n");
-    return 0;
-}
-
-void *ipcam_controller::StartIPCAMRx (void *arg)
-{
-    LOGI ( "Enter StartIPCAMRx()\n");
-    ipcam_controller * IPCAM_controller = (ipcam_controller *)arg;
-    LOGI ( "StartIPCAMRx() completed\n");
-	return 0;
-}

@@ -23,10 +23,17 @@ public class Rtsplayer {
 				switch (msg.what)
 				{
 				case RCM_CB_string:
-					try {
+					try {						
 						String mystr= (String) msg.obj;            	   
-//						Log.d("Playstream","CB_string   env: " + String.valueOf(msg.arg1)+"  string: " +mystr);
-						mainActivity.showbitmap();					
+						Log.d("Playstream","CB_string   env: " + String.valueOf(msg.arg1)+"  string: " +mystr);
+						if (mystr.contains("disp1"))
+							mainActivity.showbitmap1();				
+						else if (mystr.contains("disp2"))
+							mainActivity.showbitmap2();
+						else if (mystr.contains("disp3"))
+							mainActivity.showbitmap3();
+						else if (mystr.contains("disp4"))
+							mainActivity.showbitmap4();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

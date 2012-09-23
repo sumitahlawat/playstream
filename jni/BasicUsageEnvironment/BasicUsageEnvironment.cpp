@@ -19,7 +19,9 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "BasicUsageEnvironment.hh"
 #include <stdio.h>
-
+#include <android/log.h>
+#define LOG_TAG "live555lib"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO   , LOG_TAG,__VA_ARGS__)
 ////////// BasicUsageEnvironment //////////
 
 #if defined(__WIN32__) || defined(_WIN32)
@@ -55,26 +57,31 @@ int BasicUsageEnvironment::getErrno() const {
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(char const* str) {
   if (str == NULL) str = "(NULL)"; // sanity check
+  LOGI("%s", str);
   fprintf(stderr, "%s", str);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(int i) {
+  LOGI("%d", i);
   fprintf(stderr, "%d", i);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(unsigned u) {
+  LOGI("%u", u);
   fprintf(stderr, "%u", u);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(double d) {
+  LOGI("%f", d);
   fprintf(stderr, "%f", d);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(void* p) {
+  LOGI("%p", p);
   fprintf(stderr, "%p", p);
   return *this;
 }

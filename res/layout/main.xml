@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal" >
 
         <Button
@@ -27,6 +27,14 @@
 
         <Button
             android:id="@+id/button4"
+            android:layout_width="106dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="40dp"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/button5"
             android:layout_width="106dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -60,7 +68,17 @@
         android:layout_height="60dp"
         android:layout_gravity="left"
         android:layout_marginLeft="40dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/editText2"
+        android:layout_width="600dp"
+        android:layout_height="60dp"
+        android:layout_gravity="left"
+        android:layout_marginLeft="40dp"
         android:ems="10"
         android:inputType="text"
         android:textSize="20sp" />
@@ -76,16 +94,35 @@
     <!-- View Container -->
 
     <LinearLayout
-        android:id="@+id/rootid"
+        android:id="@+id/rootmain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp" >
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal" >
 
-        <ImageView
-            android:id="@+id/frame"
-            android:layout_width="320px"
-            android:layout_height="240px" >
-        </ImageView>
+        <LinearLayout
+            android:id="@+id/rootid1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" >
+            <ImageView
+                android:id="@+id/frame1"
+                android:layout_width="320dp"
+                android:layout_height="240dp" >
+            </ImageView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rootid2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" >
+            <ImageView
+                android:id="@+id/frame2"
+                android:layout_width="176dp"
+                android:layout_height="144dp" >
+            </ImageView>
+        </LinearLayout>
     </LinearLayout>
     <!--
          <my.streamplayer.MyGLSurfaceView

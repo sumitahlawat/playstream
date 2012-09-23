@@ -14,10 +14,22 @@ ipcam_camera *MyIPCAM3 = NULL;
 ipcam_camera *MyIPCAM4 = NULL;
 
 ipcam_vdec *videoDecode1 = NULL;
+ipcam_vdec *videoDecode2 = NULL;
+ipcam_vdec *videoDecode3 = NULL;
+ipcam_vdec *videoDecode4 = NULL;
 
 AndroidBitmapInfo  info;
+
 static int errorCam1 = 0;
-void* pixels;
+static int errorCam2 = 0;
+static int errorCam3 = 0;
+static int errorCam4 = 0;
+
+void* pixel1;
+void* pixel2;
+void* pixel3;
+void* pixel4;
+
 JavaVM *gJavaVM;
 jmethodID mid_cb_string;
 jclass      mClass;     // Reference to jtxRemSkt class
@@ -35,7 +47,6 @@ void return_Message_to_Java(char * ch_msg);
 static void fill_bitmap(AndroidBitmapInfo*  info, void *pixels, AVFrame *pFrame)
 {
 	uint8_t *frameLine;
-
 	int  yy;
 	for (yy = 0; yy < info->height; yy++) {
 		uint8_t*  line = (uint8_t*)pixels;
@@ -68,7 +79,7 @@ void return_Message_to_Java(char * ch_msg)
 
 	status = gJavaVM->GetEnv((void **) &env, JNI_VERSION_1_4);
 	if(status < 0) {
-//	LOGE("callback_handler: failed to get JNI environment, "				"assuming native thread");
+		//	LOGE("callback_handler: failed to get JNI environment, "				"assuming native thread");
 		status = gJavaVM->AttachCurrentThread(&env, NULL);
 		if(status < 0) {
 			LOGE("callback_handler: failed to attach "
@@ -81,31 +92,37 @@ void return_Message_to_Java(char * ch_msg)
 	(env)->DeleteLocalRef(str_cb);
 
 	if(isAttached)
-		gJavaVM->DetachCurrentThread();}
+		gJavaVM->DetachCurrentThread();
+}
 
 void DisplayCb_1 (AVFrame *Frame)
 {
-//	LOGI("%s : %d\n",__func__,__LINE__);
+	LOGI("%s : %d\n",__func__,__LINE__);
 	//send data back to java side to display
-	fill_bitmap(&info, pixels, Frame);
-	return_Message_to_Java("disp");
+	fill_bitmap(&info, pixel1, Frame);
+	return_Message_to_Java("disp1");
 }
 
 void DisplayCb_2 (AVFrame *Frame)
 {
-	LOGI("display frame data after callback");
+	LOGI("%s : %d\n",__func__,__LINE__);
+	fill_bitmap(&info, pixel2, Frame);
+	return_Message_to_Java("disp2");
 }
 
 void DisplayCb_3 (AVFrame *Frame)
 {
-	LOGI("display frame data after callback");
+	LOGI("%s : %d\n",__func__,__LINE__);
+	fill_bitmap(&info, pixel3, Frame);
+	return_Message_to_Java("disp3");
 }
 
 void DisplayCb_4 (AVFrame *Frame)
 {
-	LOGI("display frame data after callback");
+	LOGI("%s : %d\n",__func__,__LINE__);
+	fill_bitmap(&info, pixel4, Frame);
+	return_Message_to_Java("disp4");
 }
-
 
 /*
  * Class:     my_streamplayer_Rtsplayer
@@ -136,23 +153,20 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 	LOGI("CAM ID %d \tURL: %s \t FILE: %s\n ", ID, rtspURL, RecFile);
 
 	int ret;
-	//mid_cb_string = env->GetStaticMethodID(mClass, "rcmcallback_string","(Ljava/lang/String;)V");
-
-
-	if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
-		LOGI("AndroidBitmap_getInfo() failed ! error=%d", ret);
-		return;
-	}
-	LOGI("Checked on the bitmap");
-
-	if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
-		LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
-	}
-	LOGI("Grabbed the pixels");
 
 	switch(ID)
 	{
 	case 1:
+		if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+			LOGI("AndroidBitmap_getInfo() failed ! error=%d", ret);
+			return;
+		}
+		LOGI("Checked on the bitmap 1 ");
+
+		if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixel1)) < 0) {
+			LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		}
+
 		MyIPCAM1 = new ipcam_camera(rtspURL, ID, frame_rate);
 		MyIPCAM1->init();      // initialize ring buffers
 		MyIPCAM1->set_recFile(RecFile);
@@ -169,6 +183,93 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		//	MyIPCAM1->rec_connect();
 
 		LOGD("IPCAM %d errorCam1 %d  widthframe : %d, heightframe =%d \n", ID, errorCam1 , x, y);
+		break;
+
+	case 2:
+		if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+			LOGI("AndroidBitmap_getInfo() failed ! error=%d", ret);
+			return;
+		}
+		LOGI("Checked on the bitmap 2");
+
+		if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixel2)) < 0) {
+			LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		}
+
+		MyIPCAM2 = new ipcam_camera(rtspURL, ID, frame_rate);
+		MyIPCAM2->init();      // initialize ring buffers
+		MyIPCAM2->set_recFile(RecFile);
+
+		//create FFMPEG Decoder - must be getting created here
+		videoDecode2 = ipcam_vdec::getInstance(2);
+		videoDecode2->setparam(x, y);
+		MyIPCAM2->pVDec = videoDecode2;
+		//now initialize init
+		usleep (1000);
+		videoDecode2->InitMPEG4Dec();
+		errorCam2 = MyIPCAM2->play_connect();
+
+		LOGD("IPCAM %d errorCam2 %d  widthframe : %d, heightframe =%d \n", ID, errorCam2 , x, y);
+		break;
+
+	case 3:
+		if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+			LOGI("AndroidBitmap_getInfo() failed ! error=%d", ret);
+			return;
+		}
+		LOGI("Checked on the bitmap");
+
+		if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixel3)) < 0) {
+			LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		}
+		LOGI("Grabbed the pixels");
+
+		MyIPCAM3 = new ipcam_camera(rtspURL, ID, frame_rate);
+		MyIPCAM3->init();      // initialize ring buffers
+		MyIPCAM3->set_recFile(RecFile);
+
+		//create FFMPEG Decoder - must be getting created here
+		videoDecode3 = ipcam_vdec::getInstance(3);
+		videoDecode3->setparam(x, y);
+		MyIPCAM3->pVDec = videoDecode3;
+
+		usleep (1000);
+		videoDecode3->InitMPEG4Dec();
+
+		errorCam3 = MyIPCAM3->play_connect();
+		//	MyIPCAM1->rec_connect();
+
+		LOGD("IPCAM %d errorCam3 %d  widthframe : %d, heightframe =%d \n", ID, errorCam3 , x, y);
+		break;
+
+	case 4:
+		if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+			LOGI("AndroidBitmap_getInfo() failed ! error=%d", ret);
+			return;
+		}
+		LOGI("Checked on the bitmap");
+
+		if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixel4)) < 0) {
+			LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+		}
+		LOGI("Grabbed the pixels");
+
+		MyIPCAM4 = new ipcam_camera(rtspURL, ID, frame_rate);
+		MyIPCAM4->init();      // initialize ring buffers
+		MyIPCAM4->set_recFile(RecFile);
+
+		//create FFMPEG Decoder - must be getting created here
+		videoDecode4 = ipcam_vdec::getInstance(4);
+		videoDecode4->setparam(x, y);
+		MyIPCAM4->pVDec = videoDecode4;
+
+		usleep (1000);
+		videoDecode4->InitMPEG4Dec();
+
+		errorCam4 = MyIPCAM4->play_connect();
+		//	MyIPCAM1->rec_connect();
+
+		LOGD("IPCAM %d errorCam4 %d  widthframe : %d, heightframe =%d \n", ID, errorCam4 , x, y);
 		break;
 
 	default:
@@ -188,10 +289,28 @@ void  Java_my_streamplayer_Rtsplayer_StartRec
 	switch(ID)
 	{
 	case 1:
-		//			MyIPCAM1->start_recording();
+		//	MyIPCAM1->start_recording();
 		if(errorCam1 == 1)
 		{
 			MyIPCAM1->start_playback();
+		}
+		break;
+	case 2:
+		if(errorCam2 == 2)
+		{
+			MyIPCAM2->start_playback();
+		}
+		break;
+	case 3:
+		if(errorCam3 == 3)
+		{
+			MyIPCAM3->start_playback();
+		}
+		break;
+	case 4:
+		if(errorCam4 == 4)
+		{
+			MyIPCAM4->start_playback();
 		}
 		break;
 
@@ -216,7 +335,18 @@ void Java_my_streamplayer_Rtsplayer_StopRec
 		MyIPCAM1->stop_playback();
 		LOGD("IPCAM %d Recording Stopped\n", ID);
 		break;
-
+	case 2:
+		MyIPCAM2->stop_playback();
+		LOGD("IPCAM %d Recording Stopped\n", ID);
+		break;
+	case 3:
+		MyIPCAM3->stop_playback();
+		LOGD("IPCAM %d Recording Stopped\n", ID);
+		break;
+	case 4:
+		MyIPCAM4->stop_playback();
+		LOGD("IPCAM %d Recording Stopped\n", ID);
+		break;
 	default:
 		LOGE("INVALID CAM-ID %d", ID);
 		break;
@@ -237,7 +367,18 @@ void  Java_my_streamplayer_Rtsplayer_DestroyRec
 		MyIPCAM1->deinit();
 		LOGD("IPCAM %d DEINIT Complete\n", ID);
 		break;
-
+	case 2:
+		MyIPCAM2->deinit();
+		LOGD("IPCAM %d DEINIT Complete\n", ID);
+		break;
+	case 3:
+		MyIPCAM3->deinit();
+		LOGD("IPCAM %d DEINIT Complete\n", ID);
+		break;
+	case 4:
+		MyIPCAM4->deinit();
+		LOGD("IPCAM %d DEINIT Complete\n", ID);
+		break;
 	default:
 		LOGE("INVALID CAM-ID %d", ID);
 		break;
