@@ -113,10 +113,10 @@ public class PlaystreamActivity extends Activity {
 				image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
 				Log.v("Playstream", "image resize : " + image.getWidth() + "  "+image.getHeight());
-				Log.v("Playstream", "bitmap resize : " + mBitmap1.getWidth() + "  "+mBitmap1.getHeight());
+				Log.v("Playstream", "bitmap resize : " + mBitmap2.getWidth() + "  "+mBitmap2.getHeight());
 				String recfile = Environment.getExternalStorageDirectory().toString()+"/ipcam/record2.mov";
 				String url = url_text.getText().toString()+"live2.sdp";
-				rtplayer.CreateRec(url, recfile, 2, 176, 144, 30 ,mBitmap1);
+				rtplayer.CreateRec(url, recfile, 2, 176, 144, 30 ,mBitmap2);
 				rtplayer.StartRec(2);
 				btn_play2.setEnabled(true);
 			}

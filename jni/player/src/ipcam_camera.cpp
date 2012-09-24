@@ -38,7 +38,7 @@ int ipcam_camera::init()
 {
     int width, height;
     //Create IPCAM Controller
-    pIpCam = new ipcam_controller(url);
+    pIpCam = new ipcam_controller(url, camID);
 	return 0;
 }
 
@@ -58,6 +58,7 @@ int ipcam_camera::rec_connect()
 
 int ipcam_camera::start_playback()
 {
+	LOGI("%s : num : %d\n",__func__,camID);
 	int status = pIpCam->StartMedia();
 	if (status)
 		isPlaying = 1;

@@ -97,7 +97,7 @@ void return_Message_to_Java(char * ch_msg)
 
 void DisplayCb_1 (AVFrame *Frame)
 {
-	LOGI("%s : %d\n",__func__,__LINE__);
+//	LOGI("%s : %d\n",__func__,__LINE__);
 	//send data back to java side to display
 	fill_bitmap(&info, pixel1, Frame);
 	return_Message_to_Java("disp1");
@@ -105,21 +105,21 @@ void DisplayCb_1 (AVFrame *Frame)
 
 void DisplayCb_2 (AVFrame *Frame)
 {
-	LOGI("%s : %d\n",__func__,__LINE__);
+//	LOGI("%s : %d\n",__func__,__LINE__);
 	fill_bitmap(&info, pixel2, Frame);
 	return_Message_to_Java("disp2");
 }
 
 void DisplayCb_3 (AVFrame *Frame)
 {
-	LOGI("%s : %d\n",__func__,__LINE__);
+//	LOGI("%s : %d\n",__func__,__LINE__);
 	fill_bitmap(&info, pixel3, Frame);
 	return_Message_to_Java("disp3");
 }
 
 void DisplayCb_4 (AVFrame *Frame)
 {
-	LOGI("%s : %d\n",__func__,__LINE__);
+//	LOGI("%s : %d\n",__func__,__LINE__);
 	fill_bitmap(&info, pixel4, Frame);
 	return_Message_to_Java("disp4");
 }
@@ -296,19 +296,19 @@ void  Java_my_streamplayer_Rtsplayer_StartRec
 		}
 		break;
 	case 2:
-		if(errorCam2 == 2)
+		if(errorCam2 == 1)
 		{
 			MyIPCAM2->start_playback();
 		}
 		break;
 	case 3:
-		if(errorCam3 == 3)
+		if(errorCam3 == 1)
 		{
 			MyIPCAM3->start_playback();
 		}
 		break;
 	case 4:
-		if(errorCam4 == 4)
+		if(errorCam4 == 1)
 		{
 			MyIPCAM4->start_playback();
 		}

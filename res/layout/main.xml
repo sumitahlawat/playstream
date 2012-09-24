@@ -107,8 +107,8 @@
             android:layout_marginTop="20dp" >
             <ImageView
                 android:id="@+id/frame1"
-                android:layout_width="320dp"
-                android:layout_height="240dp" >
+                android:layout_width="320px"
+                android:layout_height="240px" >
             </ImageView>
         </LinearLayout>
 
@@ -119,8 +119,8 @@
             android:layout_marginTop="20dp" >
             <ImageView
                 android:id="@+id/frame2"
-                android:layout_width="176dp"
-                android:layout_height="144dp" >
+                android:layout_width="176px"
+                android:layout_height="144px" >
             </ImageView>
         </LinearLayout>
     </LinearLayout>

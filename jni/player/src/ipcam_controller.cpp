@@ -15,11 +15,11 @@
 #include "ipcam_controller.h"
 #include "player.h"
 
-ipcam_controller::ipcam_controller (char* URL)
+ipcam_controller::ipcam_controller (char* URL, int camid)
 {
     IPCAM_rtsp_play = new ipcam_rtsp_play();
 	IPCAM_rtsp_rec = new ipcam_rtsp_rec();
-
+	ID = camid;
     pRTSPUrl = URL;
 	filename = NULL;
 }
@@ -33,7 +33,7 @@ ipcam_controller::~ipcam_controller ()
 
 int ipcam_controller::InitMedia ()
 {
-    LOGI ("Enter ipcam_controller::InitMedia Player \n");
+    LOGI ("Enter ipcam_controller::InitMedia Player :%d\n", ID);
 	if (IPCAM_rtsp_play->Init(pRTSPUrl) != 1)
     {
         LOGI ("setupVideoCall:RTSP Rx Configuration failure\n");

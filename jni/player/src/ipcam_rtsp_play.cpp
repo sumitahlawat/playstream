@@ -350,6 +350,7 @@ playRTSPClient::~playRTSPClient()
 #define DECODER_SINK_RECEIVE_BUFFER_SIZE 100000
 
 DecoderSink* DecoderSink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId) {
+	LOGI("%s : %d\n",__func__,__LINE__);
 	return new DecoderSink(env, subsession, streamId);
 }
 
@@ -375,7 +376,7 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 		struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
 	// We've just received a frame of data.  (Optionally) print out information about it:
 	//	if (fStreamId != NULL) LOGI( "Stream :%s \n",fStreamId);
-//	LOGI("%s  /  %s : :\tReceived %d bytes", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
+	//LOGI("%s  /  %s : :\tReceived %d bytes", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
 		//call decoder function from here : somehow :P

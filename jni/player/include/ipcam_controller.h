@@ -13,9 +13,10 @@ class ipcam_controller
 		char* pRTSPUrl;		///< RTSP URL pointer
 		char* filename;
 		int fps;
+		int ID;
 
     public:
-        ipcam_controller (char* URL);
+        ipcam_controller (char* URL, int camid);
         virtual ~ipcam_controller ();
 
 		int InitMedia ();
