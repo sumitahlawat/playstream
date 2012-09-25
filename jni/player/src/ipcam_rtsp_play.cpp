@@ -116,7 +116,7 @@ void playcontinueAfterSETUP(RTSPClient* rtspClient, int resultCode, char* result
 
 		LOGI("Set up the subsession : before sink create \n");
 
-		scs.subsession->sink = DecoderSink::createNew(env, *scs.subsession, "rtspURL");
+		scs.subsession->sink = DecoderSink::createNew(env, *scs.subsession, rtspClient->url(), ((playRTSPClient*)rtspClient)->camidx);
 
 		if (scs.subsession->sink == NULL) {
 			LOGI( "Failed to create a data sink for the \" %d \" subsession: %s \n", *scs.subsession, env.getResultMsg());
@@ -250,12 +250,12 @@ void playshutdownStream(RTSPClient* rtspClient, int exitCode) {
 	return;
 }
 
-ipcam_rtsp_play::ipcam_rtsp_play()
+ipcam_rtsp_play::ipcam_rtsp_play(int camid)
 {
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	env = BasicUsageEnvironment::createNew(*scheduler);
 	rtspClient = NULL;
-
+	idx = camid;
 	watchVariable = 0;
 }
 
@@ -274,7 +274,7 @@ int ipcam_rtsp_play::Init(char *url)
 
 	watchVariable = 0;
 
-	rtspClient = playRTSPClient::createNew(*env,url, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
+	rtspClient = playRTSPClient::createNew(*env,url, verbosityLevel, applicationName, tunnelOverHTTPPortNum, idx);
 	if (rtspClient == NULL) {
 		LOGI("Failed to create a RTSP client for URL %s storename %s, %s \n" , url, env->getResultMsg() );
 		return -1;
@@ -331,32 +331,34 @@ void* StartPlay(void* arg)
 
 // Implementation of "playRTSPClient":
 playRTSPClient* playRTSPClient::createNew(UsageEnvironment& env, char const* rtspURL,
-		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum) {
-	return new playRTSPClient(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum);
+		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum, int idx) {
+	return new playRTSPClient(env, rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum, idx);
 }
 
 playRTSPClient::playRTSPClient(UsageEnvironment& env, char const* rtspURL,
-		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum)
+		int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum, int idx)
 : RTSPClient(env,rtspURL, verbosityLevel, applicationName, tunnelOverHTTPPortNum) {
-	LOGI( "playRTSPClient created\n");
+	camidx = idx;
+	LOGI( "playRTSPClient created , %d\n", camidx);
 }
 
 playRTSPClient::~playRTSPClient()
 {
-	LOGI("~playRTSPClient ");
+	LOGI("~playRTSPClient %d", camidx);
 }
 
 // Implementation of "DecoderSink":
 #define DECODER_SINK_RECEIVE_BUFFER_SIZE 100000
 
-DecoderSink* DecoderSink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId) {
-	LOGI("%s : %d\n",__func__,__LINE__);
-	return new DecoderSink(env, subsession, streamId);
+DecoderSink* DecoderSink::createNew(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, int camid) {
+	LOGI("%s : %d  streamid: %s index: %d\n",__func__,__LINE__, streamId, camid);
+	return new DecoderSink(env, subsession, streamId, camid);
 }
 
-DecoderSink::DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId)
+DecoderSink::DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, int camid)
 : MediaSink(env),
   fSubsession(subsession) {
+	camidx = camid;
 	fStreamId = strDup(streamId);
 	fReceiveBuffer = new u_int8_t[DECODER_SINK_RECEIVE_BUFFER_SIZE];
 }
@@ -369,6 +371,7 @@ DecoderSink::~DecoderSink() {
 void DecoderSink::afterGettingFrame(void* clientData, unsigned frameSize, unsigned numTruncatedBytes,
 		struct timeval presentationTime, unsigned durationInMicroseconds) {
 	DecoderSink* sink = (DecoderSink*)clientData;
+
 	sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime, durationInMicroseconds);
 }
 
@@ -376,13 +379,36 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 		struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
 	// We've just received a frame of data.  (Optionally) print out information about it:
 	//	if (fStreamId != NULL) LOGI( "Stream :%s \n",fStreamId);
-	//LOGI("%s  /  %s : :\tReceived %d bytes", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
+	//LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
-		//call decoder function from here : somehow :P
+		//call decoder function from here : somehow :P //it's done
 		//		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-		ipcam_vdec* videc = ipcam_vdec::getInstance(1);
-		videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		if (camidx==1)
+		{
+			ipcam_vdec* videc = ipcam_vdec::getInstance(1);
+			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		}
+		else if (camidx==2)
+		{
+			ipcam_vdec* videc = ipcam_vdec::getInstance(2);
+			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		}
+		if (camidx==3)
+		{
+			ipcam_vdec* videc = ipcam_vdec::getInstance(3);
+			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		}
+		if (camidx==4)
+		{
+			ipcam_vdec* videc = ipcam_vdec::getInstance(4);
+			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		}
+		else
+		{
+			ipcam_vdec* videc = ipcam_vdec::getInstance(1);
+			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		}
 	}
 	if (numTruncatedBytes > 0) envir() << " (with " << numTruncatedBytes << " bytes truncated)";
 	char uSecsStr[6+1]; // used to output the 'microseconds' part of the presentation time

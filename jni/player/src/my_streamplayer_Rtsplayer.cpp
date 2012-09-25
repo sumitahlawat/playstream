@@ -333,19 +333,19 @@ void Java_my_streamplayer_Rtsplayer_StopRec
 	case 1:
 		//			MyIPCAM1->stop_recording();
 		MyIPCAM1->stop_playback();
-		LOGD("IPCAM %d Recording Stopped\n", ID);
+		LOGD("IPCAM %d Play Stopped\n", ID);
 		break;
 	case 2:
 		MyIPCAM2->stop_playback();
-		LOGD("IPCAM %d Recording Stopped\n", ID);
+		LOGD("IPCAM %d Play Stopped\n", ID);
 		break;
 	case 3:
 		MyIPCAM3->stop_playback();
-		LOGD("IPCAM %d Recording Stopped\n", ID);
+		LOGD("IPCAM %d Play Stopped\n", ID);
 		break;
 	case 4:
 		MyIPCAM4->stop_playback();
-		LOGD("IPCAM %d Recording Stopped\n", ID);
+		LOGD("IPCAM %d Play Stopped\n", ID);
 		break;
 	default:
 		LOGE("INVALID CAM-ID %d", ID);

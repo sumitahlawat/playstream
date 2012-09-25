@@ -39,7 +39,7 @@ public class PlaystreamActivity extends Activity {
 	private Bitmap mBitmap2;
 	private Bitmap mBitmap3;
 	private Bitmap mBitmap4;
-	Rtsplayer rtplayer = new Rtsplayer(this);
+	Rtsplayer rtplayer = new Rtsplayer(this); 
 	private Button btn_play2;
 	private Button btn_play1;
 	@Override 
@@ -60,7 +60,7 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://192.168.101.199/");
+		url_text.setText("rtsp://ahlawat.servehttp.com/");
 
 		Log.v("Playstream", "imageview scaling done");
 

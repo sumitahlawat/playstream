@@ -61,8 +61,9 @@ public:
 	playRTSPClient* rtspClient;
 	ipcam_vdec *decoder;
 	int Init (char *url);
-	ipcam_rtsp_play ();
+	ipcam_rtsp_play (int id);
 	~ipcam_rtsp_play ();
+	int idx;
 };
 
 // Define a class to hold per-stream state that we maintain throughout each stream's lifetime:
@@ -84,16 +85,18 @@ public:
 	static playRTSPClient* createNew(UsageEnvironment& env, char const* rtspURL,
 			int verbosityLevel = 0,
 			char const* applicationName = NULL,
-			portNumBits tunnelOverHTTPPortNum = 0);
+			portNumBits tunnelOverHTTPPortNum = 0,
+			int camidx = 1 );
 
 protected:
 	playRTSPClient(UsageEnvironment& env, char const* rtspURL,
-			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum);
+			int verbosityLevel, char const* applicationName, portNumBits tunnelOverHTTPPortNum, int camidx);
 	// called only by createNew();
 	virtual ~playRTSPClient();
 
 public:
 	StreamClientState scs;
+	int camidx;
 };
 
 class ourRTSPClient: public RTSPClient {
@@ -122,11 +125,12 @@ class DecoderSink: public MediaSink {
 public:
 	static DecoderSink* createNew(UsageEnvironment& env,
 			MediaSubsession& subsession, // identifies the kind of data that's being received
-			char const* streamId = NULL// identifies the stream itself (optional)
+			char const* streamId = NULL,// identifies the stream itself (optional)
+			int camidx = 1   //to identify camera number
 			);
 
 private:
-	DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId);
+	DecoderSink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, int camidx);
 	virtual ~DecoderSink();
 
 	static void afterGettingFrame(void* clientData, unsigned frameSize,
@@ -143,5 +147,6 @@ private:
 	u_int8_t* fReceiveBuffer;
 	MediaSubsession& fSubsession;
 	char* fStreamId;
+	int camidx;
 };
 #endif // _IPCAM_RTSP_H_

@@ -17,7 +17,7 @@
 
 ipcam_controller::ipcam_controller (char* URL, int camid)
 {
-    IPCAM_rtsp_play = new ipcam_rtsp_play();
+    IPCAM_rtsp_play = new ipcam_rtsp_play(camid);
 	IPCAM_rtsp_rec = new ipcam_rtsp_rec();
 	ID = camid;
     pRTSPUrl = URL;
