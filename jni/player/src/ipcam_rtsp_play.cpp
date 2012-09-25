@@ -54,7 +54,7 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 		}
 
 		char* sdpDescription = resultString;
-		LOGI("Got a SDP description: \n %s \n", sdpDescription);
+		//LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
 		// Create a media session object from this SDP description:
 		scs.session = MediaSession::createNew(env, sdpDescription);
@@ -394,19 +394,14 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 			ipcam_vdec* videc = ipcam_vdec::getInstance(2);
 			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
 		}
-		if (camidx==3)
+		else if (camidx==3)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(3);
 			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
 		}
-		if (camidx==4)
+		else if (camidx==4)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(4);
-			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-		}
-		else
-		{
-			ipcam_vdec* videc = ipcam_vdec::getInstance(1);
 			videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
 		}
 	}

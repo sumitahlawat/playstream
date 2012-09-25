@@ -39,7 +39,7 @@ public class PlaystreamActivity extends Activity {
 	private Bitmap mBitmap2;
 	private Bitmap mBitmap3;
 	private Bitmap mBitmap4;
-	Rtsplayer rtplayer = new Rtsplayer(this); 
+	Rtsplayer rtplayer = new Rtsplayer(this);
 	private Button btn_play2;
 	private Button btn_play1;
 	@Override 
