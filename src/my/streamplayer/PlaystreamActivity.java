@@ -60,7 +60,8 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://ahlawat.servehttp.com/");
+		url_text.setText("rtsp://192.168.11.21:5544/");
+//		url_text.setText("rtsp://ahlawat.servehttp.com/");
 
 		Log.v("Playstream", "imageview scaling done");
 
@@ -147,7 +148,7 @@ public class PlaystreamActivity extends Activity {
 				rtplayer.StopRec(1);
 				ImageView image = (ImageView)findViewById(R.id.frame1);
 				image.setBackgroundColor(Color.GREEN);
-				rtplayer.StopRec(2);
+//				rtplayer.StopRec(2);
 				ImageView image2 = (ImageView)findViewById(R.id.frame2);
 				image2.setBackgroundColor(Color.BLUE);
 				btn_stop.setEnabled(true);

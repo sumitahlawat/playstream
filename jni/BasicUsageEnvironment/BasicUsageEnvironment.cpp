@@ -58,30 +58,39 @@ int BasicUsageEnvironment::getErrno() const {
 UsageEnvironment& BasicUsageEnvironment::operator<<(char const* str) {
   if (str == NULL) str = "(NULL)"; // sanity check
   LOGI("%s", str);
+#ifdef ANDROID
+  LOGI("%s", str);
+#endif
+
+  printf("%s", str);
   fprintf(stderr, "%s", str);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(int i) {
   LOGI("%d", i);
+  printf("%d", i);
   fprintf(stderr, "%d", i);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(unsigned u) {
   LOGI("%u", u);
+  printf( "%u", u);
   fprintf(stderr, "%u", u);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(double d) {
   LOGI("%f", d);
+  printf("%f", d);
   fprintf(stderr, "%f", d);
   return *this;
 }
 
 UsageEnvironment& BasicUsageEnvironment::operator<<(void* p) {
   LOGI("%p", p);
+  printf("%p", p);
   fprintf(stderr, "%p", p);
   return *this;
 }

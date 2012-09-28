@@ -54,7 +54,7 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 		}
 
 		char* sdpDescription = resultString;
-		//LOGI("Got a SDP description: \n %s \n", sdpDescription);
+		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
 		// Create a media session object from this SDP description:
 		scs.session = MediaSession::createNew(env, sdpDescription);
@@ -379,11 +379,11 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 		struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
 	// We've just received a frame of data.  (Optionally) print out information about it:
 	//	if (fStreamId != NULL) LOGI( "Stream :%s \n",fStreamId);
-	//LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
+
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
-		//call decoder function from here : somehow :P //it's done
-		//		DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+		//call video decoder function from here : somehow :P //it's done
+		LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
 		if (camidx==1)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(1);

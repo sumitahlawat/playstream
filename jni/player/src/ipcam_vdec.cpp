@@ -194,6 +194,7 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 		len = avcodec_decode_video2(pContext, pFrame, &gotPicture, &avpkt);
 		if (len < 0) {
 			LOGI("Error while decoding frame %d\n", frame);
+			av_free(buf);
 			return -1;
 		}
 		if (gotPicture) {
@@ -215,6 +216,7 @@ int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
 //				SaveFrame(out_pic, pContext->width,	pContext->height, savep);
 
 			//find a way to display now
+			av_free(buf);
 			av_free(out_pic);
 			out_pic = NULL;
 		}
