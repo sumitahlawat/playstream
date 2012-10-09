@@ -108,14 +108,28 @@
             android:id="@+id/rootid2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp" 
-            android:layout_marginLeft="30dp">
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="20dp" >
 
             <ImageView
                 android:id="@+id/frame2"
                 android:layout_width="176px"
                 android:layout_height="144px" >
             </ImageView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rootid3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="20dp" >
+
+            <my.streamplayer.MyGLSurfaceView
+                android:id="@+id/Panel1"
+                android:layout_width="320px"
+                android:layout_height="240px"
+                android:clickable="true" />
         </LinearLayout>
     </LinearLayout>
     <!--

@@ -7,17 +7,23 @@ import java.util.Calendar;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,7 +40,7 @@ public class PlaystreamActivity extends Activity {
 	private EditText url_text;
 	private EditText Xres;
 	private EditText Yres;
-	//private MyGLSurfaceView surfaceView;
+	private MyGLSurfaceView surfaceView;
 	private Bitmap mBitmap1;
 	private Bitmap mBitmap2;
 	private Bitmap mBitmap3;
@@ -60,8 +66,8 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://192.168.11.21:5544/");
-//		url_text.setText("rtsp://ahlawat.servehttp.com/");
+		url_text.setText("rtsp://192.168.11.24:5544/");
+		//		url_text.setText("rtsp://ahlawat.servehttp.com/");
 
 		Log.v("Playstream", "imageview scaling done");
 
@@ -70,10 +76,13 @@ public class PlaystreamActivity extends Activity {
 		directory.mkdirs();
 
 		ImageView image = (ImageView)findViewById(R.id.frame1);
-		image.setBackgroundColor(Color.GREEN);		
+		//image.setBackgroundColor(Color.GREEN);
+		image.setBackgroundColor(Color.YELLOW);
 		ImageView image2 = (ImageView)findViewById(R.id.frame2);
 		image2.setBackgroundColor(Color.BLUE);
+		image2.setVisibility(View.GONE);
 
+		surfaceView = new MyGLSurfaceView(getApplicationContext());
 		btn_play1 = (Button) findViewById(R.id.button4);
 		btn_play1.setText("Play1");
 		btn_play1.setOnClickListener(new View.OnClickListener() {
@@ -148,7 +157,7 @@ public class PlaystreamActivity extends Activity {
 				rtplayer.StopRec(1);
 				ImageView image = (ImageView)findViewById(R.id.frame1);
 				image.setBackgroundColor(Color.GREEN);
-//				rtplayer.StopRec(2);
+				//				rtplayer.StopRec(2);
 				ImageView image2 = (ImageView)findViewById(R.id.frame2);
 				image2.setBackgroundColor(Color.BLUE);
 				btn_stop.setEnabled(true);
@@ -161,7 +170,7 @@ public class PlaystreamActivity extends Activity {
 			public void onClick(View v) {
 				btn_exit.setEnabled(false);
 				rtplayer.StopRec(1);
-				rtplayer.StopRec(2);
+				//	rtplayer.StopRec(2);
 				finish();
 			}
 		});		
@@ -170,7 +179,20 @@ public class PlaystreamActivity extends Activity {
 	public void showbitmap1()
 	{		
 		ImageView i = (ImageView)findViewById(R.id.frame1);
+
+		Log.v("Playstream", " image w: "+i.getWidth() + " h: "+i.getHeight() + "bmp w: "+mBitmap1.getWidth() +" h: "+ mBitmap1.getHeight());
+		//Bitmap scaled = Bitmap.createScaledBitmap(mBitmap1, i.getWidth(), i.getHeight(), true);
+
 		i.setImageBitmap(mBitmap1);
+		i.refreshDrawableState();
+
+		Log.v("Playstream", " image w: "+i.getWidth());
+
+		//to draw on a surfaceview  
+		/*	MyPanelView Pview = (MyPanelView)findViewById(R.id.Panel1);
+		Pview.render(mBitmap1);*/
+		MyGLSurfaceView GView = (MyGLSurfaceView)findViewById(R.id.Panel1);
+		GView.render(mBitmap1);
 	}
 
 	public void showbitmap2() {
@@ -190,17 +212,111 @@ public class PlaystreamActivity extends Activity {
 	}
 }
 
-class MyGLSurfaceView extends GLSurfaceView {
+
+class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
+
+	private Bitmap mBitmap;
+	public MyPanelView(Context context) {
+		super(context);
+		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+		getHolder().addCallback(this);
+		//		mThread = new ViewThread(this);
+	}
+
+
+	public MyPanelView(Context context, AttributeSet attr) {
+		super(context, attr);
+		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+		getHolder().addCallback(this);
+		//		mThread = new ViewThread(this);
+	}
+
+	public void doDraw(Canvas canvas) {
+		//canvas.drawColor(Color.BLUE);
+		canvas.setBitmap(mBitmap);
+		//canvas.drawBitmap(mBitmap, 0, 0, null);
+	}
+
+	public void render(Bitmap bmap)
+	{
+		//		Log.v("Playstream", " image w: "+bmap.getWidth());
+		mBitmap=bmap;
+		Canvas canvas = null;
+		SurfaceHolder mHolder = getHolder();
+		canvas = mHolder.lockCanvas();
+		if (canvas != null) {
+			doDraw(canvas);
+			mHolder.unlockCanvasAndPost(canvas);
+		}
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		/*	if (!mThread.isAlive()) {
+			mThread = new ViewThread(this);
+			mThread.setRunning(true);
+			mThread.start();
+		}*/
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		/*if (mThread.isAlive()) {
+			mThread.setRunning(false);
+		}*/
+	}
+}
+
+
+class MyGLSurfaceView extends GLSurfaceView implements SurfaceHolder.Callback {
 	MyRenderer mRenderer;
 
-	public MyGLSurfaceView(Context context, AttributeSet attrs) {		
-		super(context, attrs);
+	public MyGLSurfaceView(Context context) {		
+		super(context);
 
-		Log.v("Playstream", "MyGLSurfaceView " + attrs.toString());
+		Log.v("Playstream", "MyGLSurfaceView " );
 		mRenderer = new MyRenderer();
 		setRenderer(mRenderer);
 		setFocusableInTouchMode(true);
 	}		
+
+	public MyGLSurfaceView(Context context, AttributeSet attr) {
+		super(context, attr);
+
+		Log.v("Playstream", "MyGLSurfaceView with attr" );
+		mRenderer = new MyRenderer();
+		setRenderer(mRenderer);
+		setFocusableInTouchMode(true);
+	}
+
+	public void render(Bitmap bmap)
+	{		
+		GLUtils.texImage2D(GL10.GL_TEXTURE_2D,0,bmap,0);
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		// TODO Auto-generated method stub
+
+	}
 
 	public boolean onTouchEvent(final MotionEvent event) {
 		queueEvent(new Runnable(){

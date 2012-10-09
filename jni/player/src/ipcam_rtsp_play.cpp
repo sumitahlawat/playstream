@@ -383,7 +383,7 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
 		//call video decoder function from here : somehow :P //it's done
-		LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
+		//LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
 		if (camidx==1)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(1);
