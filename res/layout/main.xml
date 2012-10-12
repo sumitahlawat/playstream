@@ -125,7 +125,7 @@
             android:layout_marginLeft="30dp"
             android:layout_marginTop="20dp" >
 
-            <my.streamplayer.MyGLSurfaceView
+            <my.streamplayer.MyPanelView
                 android:id="@+id/Panel1"
                 android:layout_width="320px"
                 android:layout_height="240px"

@@ -7,13 +7,14 @@ import java.util.Calendar;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.os.Bundle;
@@ -52,9 +53,8 @@ public class PlaystreamActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//		super.onCreate(null);
-		Log.v("Playstream", "before content set");
-		setContentView(R.layout.main);         
-		Log.v("Playstream", "set content done");
+
+		setContentView(R.layout.main);         		
 		Display display = getWindowManager().getDefaultDisplay();        
 
 		Log.v("Playstream", "height = "+ display.getHeight());
@@ -66,7 +66,7 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://192.168.11.24:5544/");
+		url_text.setText("rtsp://192.168.11.29:5544/");
 		//		url_text.setText("rtsp://ahlawat.servehttp.com/");
 
 		Log.v("Playstream", "imageview scaling done");
@@ -82,7 +82,12 @@ public class PlaystreamActivity extends Activity {
 		image2.setBackgroundColor(Color.BLUE);
 		image2.setVisibility(View.GONE);
 
-		surfaceView = new MyGLSurfaceView(getApplicationContext());
+
+		MyPanelView Pview = (MyPanelView)findViewById(R.id.Panel1);
+		Pview.setactivity(this);
+
+		//surfaceView = new MyGLSurfaceView(getApplicationContext());
+
 		btn_play1 = (Button) findViewById(R.id.button4);
 		btn_play1.setText("Play1");
 		btn_play1.setOnClickListener(new View.OnClickListener() {
@@ -180,19 +185,18 @@ public class PlaystreamActivity extends Activity {
 	{		
 		ImageView i = (ImageView)findViewById(R.id.frame1);
 
-		Log.v("Playstream", " image w: "+i.getWidth() + " h: "+i.getHeight() + "bmp w: "+mBitmap1.getWidth() +" h: "+ mBitmap1.getHeight());
+		//Log.v("Playstream", " image w: "+i.getWidth() + " h: "+i.getHeight() + "bmp w: "+mBitmap1.getWidth() +" h: "+ mBitmap1.getHeight());
 		//Bitmap scaled = Bitmap.createScaledBitmap(mBitmap1, i.getWidth(), i.getHeight(), true);
 
 		i.setImageBitmap(mBitmap1);
-		i.refreshDrawableState();
-
-		Log.v("Playstream", " image w: "+i.getWidth());
+		i.refreshDrawableState();	
 
 		//to draw on a surfaceview  
-		/*	MyPanelView Pview = (MyPanelView)findViewById(R.id.Panel1);
-		Pview.render(mBitmap1);*/
-		MyGLSurfaceView GView = (MyGLSurfaceView)findViewById(R.id.Panel1);
-		GView.render(mBitmap1);
+		MyPanelView Pview = (MyPanelView)findViewById(R.id.Panel1);
+		//Pview.mBitmap=mBitmap1	;
+		Pview.render();
+		//MyGLSurfaceView GView = (MyGLSurfaceView)findViewById(R.id.Panel1);
+		//	GView.render(mBitmap1);
 	}
 
 	public void showbitmap2() {
@@ -210,44 +214,94 @@ public class PlaystreamActivity extends Activity {
 		// TODO Auto-generated method stub
 
 	}
+
+	public Bitmap getbitmap1()
+	{
+		return mBitmap1;
+	}
 }
 
 
 class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 
-	private Bitmap mBitmap;
+	public Bitmap mBitmap;
+	private ViewThread mThread;
+	private boolean toggle = true;
+	private PlaystreamActivity act;
 	public MyPanelView(Context context) {
 		super(context);
-		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);
 		getHolder().addCallback(this);
-		//		mThread = new ViewThread(this);
+		/*render(mBitmap);*/
+
+		mThread = new ViewThread(this);
 	}
 
 
 	public MyPanelView(Context context, AttributeSet attr) {
 		super(context, attr);
-		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-		getHolder().addCallback(this);
-		//		mThread = new ViewThread(this);
+
+		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);
+		getHolder().addCallback(this);		
+		/*render(mBitmap);*/
+		mThread = new ViewThread(this);
+	}
+
+	public void setactivity(PlaystreamActivity activity)
+	{
+		act=activity;
 	}
 
 	public void doDraw(Canvas canvas) {
-		//canvas.drawColor(Color.BLUE);
-		canvas.setBitmap(mBitmap);
-		//canvas.drawBitmap(mBitmap, 0, 0, null);
+
+		Bitmap Bmap = act.getbitmap1();
+
+		Log.v("Playstream", " todraw :  "+Bmap.toString());
+		Paint p =new Paint();
+		/*		String filename= Environment.getExternalStorageDirectory().toString()+"/ipcam/"+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + Calendar.getInstance().get(Calendar.MINUTE)+Calendar.getInstance().get(Calendar.SECOND) +".jpg";
+		try {
+			FileOutputStream out = new FileOutputStream(filename);
+			Bmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		 */		/*if (toggle)    	
+    		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);    
+    	else
+    		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ttx);
+    	toggle=!toggle;*/
+		canvas.drawColor(Color.BLACK);
+		canvas.drawBitmap(Bmap, 0, 0, p);
+		mThread.todraw=false;  //draw done, wait for new bitmap
+	}
+
+	public void render()
+	{
+		mThread.todraw=true;   //now can draw
 	}
 
 	public void render(Bitmap bmap)
 	{
-		//		Log.v("Playstream", " image w: "+bmap.getWidth());
-		mBitmap=bmap;
-		Canvas canvas = null;
+		//Log.v("Playstream", " image w: "+mBitmap.toString());
+		//mBitmap=bmap;
+		//Log.v("Playstream", " image w: "+mBitmap.toString());
+		mThread.todraw=true;   //now can draw
+		/*		Canvas canvas = null;
 		SurfaceHolder mHolder = getHolder();
 		canvas = mHolder.lockCanvas();
-		if (canvas != null) {
-			doDraw(canvas);
-			mHolder.unlockCanvasAndPost(canvas);
-		}
+		bringToFront();
+		synchronized (mHolder)
+		{
+			if (canvas != null) {
+				doDraw(canvas);
+				mHolder.unlockCanvasAndPost(canvas);
+
+				Paint p = new Paint();
+				Rect destRect = new Rect(0, 0, bmap.getWidth(), bmap.getHeight());
+				canvas.drawColor(Color.BLUE);
+				canvas.drawBitmap(bmap, null, destRect, p);
+			}
+		}*/
 	}
 
 	@Override
@@ -257,18 +311,51 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		/*	if (!mThread.isAlive()) {
+		if (!mThread.isAlive()) {
 			mThread = new ViewThread(this);
 			mThread.setRunning(true);
 			mThread.start();
-		}*/
+		}
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		/*if (mThread.isAlive()) {
+		if (mThread.isAlive()) {
 			mThread.setRunning(false);
-		}*/
+		}
+	}
+}
+
+
+
+class ViewThread extends Thread {
+	private MyPanelView mPanel;
+	private SurfaceHolder mHolder;
+	private boolean mRun = false;	
+	public boolean todraw=false;
+
+	public ViewThread(MyPanelView panel) {
+		mPanel = panel;
+		mHolder = mPanel.getHolder();
+	}
+
+	public void setRunning(boolean run) {
+		mRun = run;
+	}
+
+	@Override
+	public void run() {
+		Canvas canvas = null;
+		while (mRun) {
+			if (todraw) {
+				canvas = mHolder.lockCanvas();				
+				if (canvas != null) {
+					Log.d("ViewThread", "Doing Draw");
+					mPanel.doDraw(canvas);
+					mHolder.unlockCanvasAndPost(canvas);
+				}
+			}
+		}
 	}
 }
 
@@ -309,7 +396,7 @@ class MyGLSurfaceView extends GLSurfaceView implements SurfaceHolder.Callback {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
