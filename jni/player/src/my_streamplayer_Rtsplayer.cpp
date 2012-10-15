@@ -177,7 +177,7 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		MyIPCAM1->pVDec = videoDecode1;
 
 		usleep (1000);
-		videoDecode1->InitMPEG4Dec();
+	//	videoDecode1->InitMPEG4Dec();  //doing this in play now, in playcontinueAfterDESCRIBE
 
 		errorCam1 = MyIPCAM1->play_connect();
 		//	MyIPCAM1->rec_connect();
@@ -206,7 +206,7 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		MyIPCAM2->pVDec = videoDecode2;
 		//now initialize init
 		usleep (1000);
-		videoDecode2->InitMPEG4Dec();
+		//videoDecode2->InitMPEG4Dec();
 		errorCam2 = MyIPCAM2->play_connect();
 
 		LOGD("IPCAM %d errorCam2 %d  widthframe : %d, heightframe =%d \n", ID, errorCam2 , x, y);
@@ -234,7 +234,7 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		MyIPCAM3->pVDec = videoDecode3;
 
 		usleep (1000);
-		videoDecode3->InitMPEG4Dec();
+		//videoDecode3->InitMPEG4Dec();
 
 		errorCam3 = MyIPCAM3->play_connect();
 		//	MyIPCAM1->rec_connect();
@@ -264,7 +264,7 @@ void Java_my_streamplayer_Rtsplayer_CreateRec
 		MyIPCAM4->pVDec = videoDecode4;
 
 		usleep (1000);
-		videoDecode4->InitMPEG4Dec();
+		//videoDecode4->InitMPEG4Dec();
 
 		errorCam4 = MyIPCAM4->play_connect();
 		//	MyIPCAM1->rec_connect();

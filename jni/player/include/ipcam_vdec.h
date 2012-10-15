@@ -37,6 +37,8 @@ private:
 public:
 	AVCodec        *pCodec;
 	AVCodecContext *pContext;
+	AVCodecParserContext *h264_parser;
+
 	AVFrame        *pFrame ,*out_pic;;
 	unsigned char  *picBuffer;
 	int 			picSize;
@@ -48,7 +50,9 @@ public:
 
 	void setparam(int vwidth, int vheight);
 	int InitMPEG4Dec ();
+	int InitH264Dec();
 	int DecVideo (unsigned char* pBuffer, unsigned int bufferSize);
+	int DecVideoH264 (unsigned char* pBuffer, unsigned int bufferSize);
 };
 
 #endif // _IPCAM_VDEC_H_

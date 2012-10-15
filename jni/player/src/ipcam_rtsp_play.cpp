@@ -56,6 +56,13 @@ void playcontinueAfterDESCRIBE(RTSPClient* rtspClient, int resultCode, char* res
 		char* sdpDescription = resultString;
 		LOGI("Got a SDP description: \n %s \n", sdpDescription);
 
+		//initialize decoder based on stream description
+		ipcam_vdec* videc = ipcam_vdec::getInstance(((playRTSPClient*)rtspClient)->camidx);
+		if (strstr(sdpDescription, "H264")!=NULL)		//H264 stream
+			videc->InitH264Dec();
+		else												//must be MPEG4
+			videc->InitMPEG4Dec();
+
 		// Create a media session object from this SDP description:
 		scs.session = MediaSession::createNew(env, sdpDescription);
 		delete[] sdpDescription; // because we don't need it anymore
@@ -383,7 +390,7 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
 		//call video decoder function from here : somehow :P //it's done
-		//LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
+		LOGI("%s  /  %s : :\tReceived %d bytes camid = %d", fSubsession.mediumName(), fSubsession.codecName(), frameSize , camidx);
 		if (camidx==1)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(1);

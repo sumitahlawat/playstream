@@ -149,6 +149,59 @@ int ipcam_vdec::InitMPEG4Dec()
 	return 0;
 }
 
+int ipcam_vdec::InitH264Dec()
+{
+	LOGI( "Enter InitH264Dec() %d\n", videoWindow);
+	avcodec_init();
+	avcodec_register_all();
+	pCodec = avcodec_find_decoder (CODEC_ID_H264);
+	if (!pCodec) {
+		LOGI("Could not find codec to decode H264 video\n");
+	}
+
+	pFrame = avcodec_alloc_frame();
+
+//	pContext->bit_rate = 1000;  //temp value
+	pContext = avcodec_alloc_context();
+	/* resolution must be a multiple of two */
+	pContext->width =  mpgParm.width;   //temp value width
+	pContext->height = mpgParm.height;    //temp value height
+	/* frames per second */
+	//pContext->time_base= (AVRational){1,25};
+	pContext->pix_fmt = PIX_FMT_YUV420P;  //old
+	//	pContext->pix_fmt = PIX_FMT_RGB24;    //for storing ppm's
+	//pContext->pix_fmt =PIX_FMT_RGB565;   //for glsurface
+
+	//calculate picture size and allocate memory
+	picSize = avpicture_get_size(pContext->pix_fmt, pContext->width, pContext->height);
+	LOGI("Width %d, Height %d picSize %d\n", pContext->width, pContext->height, picSize);
+
+	picBuffer = new uint8_t[picSize];
+
+	/*if (pCodec->capabilities & CODEC_CAP_TRUNCATED)	{
+		//We do not send one total frame at one time
+		pContext->flags |= CODEC_FLAG_TRUNCATED;
+		pContext->flags |= CODEC_FLAG_EMU_EDGE;
+	}*/
+
+	if(pCodec->capabilities & CODEC_CAP_DR1) {
+		pContext->flags |= CODEC_FLAG_EMU_EDGE;
+	}
+
+	// Inform the codec that we can handle truncated bitstreams -- i.e.,
+	// bitstreams where frame boundaries can fall in the middle of packets
+	if(pCodec->capabilities & CODEC_CAP_TRUNCATED)
+		pContext->flags|=CODEC_FLAG_TRUNCATED;
+
+	pContext->flags|=CODEC_CAP_DELAY;
+
+	if (avcodec_open (pContext, pCodec) < 0) {
+		LOGI( "Could not open video codec\n");
+	}
+	LOGI("InitH264Dec complete\n");
+	return 0;
+}
+
 int savep = 0;
 //works only for RGB24 data
 void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
@@ -172,6 +225,11 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 		fwrite(pFrame->data[0]+y*pFrame->linesize[0], 1, width*3, pFile);
 
 	fclose(pFile);
+}
+
+int ipcam_vdec::DecVideoH264(unsigned char* inBuffer, unsigned int bufferSize)
+{
+
 }
 
 int ipcam_vdec::DecVideo(unsigned char* inBuffer, unsigned int bufferSize)
