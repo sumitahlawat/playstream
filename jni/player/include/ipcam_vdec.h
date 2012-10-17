@@ -35,13 +35,15 @@ private:
 	static ipcam_vdec* m_Decoder4;
 
 public:
-	AVCodec        *pCodec;
+	AVCodec	*pCodec;  //for mpeg-4
+	AVCodec	*codec;		//for h264
 	AVCodecContext *pContext;
+	AVCodecContext *c;
 	AVCodecParserContext *h264_parser;
 
-	AVFrame        *pFrame ,*out_pic;;
+	AVFrame *picture,*pFrame ,*out_pic;;
 	unsigned char  *picBuffer;
-	int 			picSize;
+	int	picSize;
 	struct SwsContext* img_convert_ctx;
 
 	MPEG_DECODING_PRAMS_t   mpgParm;

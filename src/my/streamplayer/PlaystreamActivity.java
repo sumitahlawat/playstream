@@ -66,7 +66,8 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://192.168.11.30:5544/");
+		url_text.setText("rtsp://192.168.101.104:5544/");
+		//url_text.setText("rtsp://192.168.101.199/");
 		//		url_text.setText("rtsp://ahlawat.servehttp.com/");
 
 		Log.v("Playstream", "imageview scaling done");
@@ -304,12 +305,12 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 		}*/
 	}
 
-	@Override
+	
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
+	
 	public void surfaceCreated(SurfaceHolder holder) {
 		if (!mThread.isAlive()) {
 			mThread = new ViewThread(this);
@@ -318,7 +319,7 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	@Override
+	
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		if (mThread.isAlive()) {
 			mThread.setRunning(false);
