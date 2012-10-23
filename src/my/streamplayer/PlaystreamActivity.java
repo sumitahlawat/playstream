@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.os.AsyncTask;
@@ -54,7 +55,7 @@ public class PlaystreamActivity extends Activity {
 	private EditText url_text;
 	private EditText Xres;
 	private EditText Yres;
-	private MyGLSurfaceView surfaceView;
+	//	private MyGLSurfaceView surfaceView;
 	private Bitmap mBitmap1;
 	private Bitmap mBitmap2;
 	private Bitmap mBitmap3;
@@ -83,13 +84,13 @@ public class PlaystreamActivity extends Activity {
 		Yres.setText("240");
 		url_text = (EditText) findViewById(R.id.editText1);
 		//		url_text.setText("rtsp://tijuana.ucsd.edu/branson/physics130a/spring2003/060203_full.mp4");		
-		url_text.setText("rtsp://192.168.101.104:5544/live.sdp");
-		//url_text.setText("rtsp://192.168.101.199/live.sdp");
+		url_text.setText("http://192.168.101.199/video.mjpg");
+		//url_text.setText("rtsp://192.168.101.199/live2.sdp");
 		//		url_text.setText("rtsp://ahlawat.servehttp.com/live.sdp");
 
 		Log.v("Playstream", "imageview scaling done");
 
-
+		mv = (MyPanelView)findViewById(R.id.Panel1);
 		File directory = new File(Environment.getExternalStorageDirectory()+File.separator+"ipcam");
 		directory.mkdirs();
 
@@ -127,6 +128,7 @@ public class PlaystreamActivity extends Activity {
 				if (url.contains("http"))
 					new DoRead().execute(url);
 				else {
+					mv.startPlayback();
 					rtplayer.CreateRec(url, recfile, 1, Integer.parseInt(Xres.getText().toString()), Integer.parseInt(Yres.getText().toString()), 30 ,mBitmap1);
 					rtplayer.StartRec(1);
 				}
@@ -214,8 +216,8 @@ public class PlaystreamActivity extends Activity {
 		i.refreshDrawableState();	
 
 		//to draw on a surfaceview  
-		MyPanelView Pview = (MyPanelView)findViewById(R.id.Panel1);
-		//Pview.mBitmap=mBitmap1	;
+		MyPanelView Pview = (MyPanelView)findViewById(R.id.Panel1);		
+		Pview.mBitmap=mBitmap1	;
 		Pview.render();
 		//MyGLSurfaceView GView = (MyGLSurfaceView)findViewById(R.id.Panel1);
 		//	GView.render(mBitmap1);
@@ -270,9 +272,9 @@ public class PlaystreamActivity extends Activity {
 		}
 
 		protected void onPostExecute(MjpegInputStream result) {
+			Log.d(TAG, "onPostExecute : ");
 			mv.setSource(result);
-			mv.setDisplayMode(MyPanelView.SIZE_BEST_FIT);
-			mv.showFps(true);
+			mv.setDisplayMode(MyPanelView.SIZE_BEST_FIT);			
 		}
 	}
 }
@@ -281,48 +283,45 @@ public class PlaystreamActivity extends Activity {
 class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 
 	private static final String TAG = "MyPanelView";
-	
-	public Bitmap mBitmap;
-	private ViewThread mThread;
+
+	public static Bitmap mBitmap;
+	//private ViewThread mThread;
 	private boolean toggle = true;
 	private PlaystreamActivity act;
 
-
-	private MjpegViewThread thread;
+	private MjpegViewThread mThread;
 
 	public final static int SIZE_STANDARD   = 1; 
+	public final static int SIZE_FIXED   = 2;
 	public final static int SIZE_BEST_FIT   = 4;
 	public final static int SIZE_FULLSCREEN = 8;
 
 	private boolean mRun = false;
 	private MjpegInputStream mIn = null;
-	
-	private boolean showFps = false;
-	private boolean surfaceDone = false;    
-	private Paint overlayPaint;
-	private int overlayTextColor;
-	private int overlayBackgroundColor;
-	private int ovlPos;
+
+	private boolean surfaceDone = false;    	
 	private int dispWidth;
 	private int dispHeight;
 	private int displayMode;
 
 	public MyPanelView(Context context) {
 		super(context);
-		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);
-		getHolder().addCallback(this);
-		/*render(mBitmap);*/
+		init(context);
+		/*mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);
 
-		mThread = new ViewThread(this);
+		getHolder().addCallback(this);
+		render(mBitmap);
+		mThread
+		mThread = new ViewThread(this);*/
 	}
 
 	public MyPanelView(Context context, AttributeSet attr) {
 		super(context, attr);
-
-		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);
+		init(context); 
+		/*mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tt);
 		getHolder().addCallback(this);		
-		/*render(mBitmap);*/
-		mThread = new ViewThread(this);
+		render(mBitmap);
+		mThread = new ViewThread(this);*/
 	}
 
 	public void setactivity(PlaystreamActivity activity)
@@ -336,9 +335,10 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	public void startPlayback() { 
-		if(mIn != null) {
+		Log.d(TAG, "startPlayback ");
+		/*if(mIn != null)*/ {
 			mRun = true;
-			thread.start();         
+			mThread.start();         
 		}
 	}
 
@@ -346,10 +346,6 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 		displayMode = s; 
 	}
 
-	public void showFps(boolean b) { 
-		showFps = b; 
-	}
-	
 	public void doDraw(Canvas canvas) {
 
 		Bitmap Bmap = act.getbitmap1();
@@ -375,60 +371,42 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 
 	public void render()
 	{
+		Log.d(TAG, "render now");
 		mThread.todraw=true;   //now can draw
 	}
 
 	public void render(Bitmap bmap)
 	{
-		//Log.v("Playstream", " image w: "+mBitmap.toString());
-		//mBitmap=bmap;
-		//Log.v("Playstream", " image w: "+mBitmap.toString());
 		mThread.todraw=true;   //now can draw
-		/*		Canvas canvas = null;
-		SurfaceHolder mHolder = getHolder();
-		canvas = mHolder.lockCanvas();
-		bringToFront();
-		synchronized (mHolder)
-		{
-			if (canvas != null) {
-				doDraw(canvas);
-				mHolder.unlockCanvasAndPost(canvas);
-
-				Paint p = new Paint();
-				Rect destRect = new Rect(0, 0, bmap.getWidth(), bmap.getHeight());
-				canvas.drawColor(Color.BLUE);
-				canvas.drawBitmap(bmap, null, destRect, p);
-			}
-		}*/
 	}
 
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		mThread.setSurfaceSize(width, height); 
 		// TODO Auto-generated method stub
 	}
 
-
 	public void surfaceCreated(SurfaceHolder holder) {
-		if (!mThread.isAlive()) {
-			mThread = new ViewThread(this);
-			mThread.setRunning(true);
-			mThread.start();
-		}
+		surfaceDone=true;
 	}
-
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		if (mThread.isAlive()) {
-			mThread.setRunning(false);
-		}
+
 	}
 
+	private void init(Context context) {
+		SurfaceHolder holder = getHolder();
+		holder.addCallback(this);
+		mThread = new MjpegViewThread(holder, context);
+		setFocusable(true);
+		displayMode = MyPanelView.SIZE_FIXED;
+		dispWidth = getWidth();
+		dispHeight = getHeight();
+	}
 
 	public class MjpegViewThread extends Thread {
-		private SurfaceHolder mSurfaceHolder;
-		private int frameCounter = 0;
-		private long start;
-		private Bitmap ovl;
+		private SurfaceHolder mSurfaceHolder;					
+		public boolean todraw=false;
 
 		public MjpegViewThread(SurfaceHolder surfaceHolder, Context context) {
 			mSurfaceHolder = surfaceHolder;
@@ -437,6 +415,9 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 		private Rect destRect(int bmw, int bmh) {
 			int tempx;
 			int tempy;
+			if (displayMode == MyPanelView.SIZE_FIXED){
+				return new Rect(0, 0, bmw, bmh);
+			}
 			if (displayMode == MyPanelView.SIZE_STANDARD) {
 				tempx = (dispWidth / 2) - (bmw / 2);
 				tempy = (dispHeight / 2) - (bmh / 2);
@@ -467,60 +448,31 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 			}
 		}
 
-		private Bitmap makeFpsOverlay(Paint p, String text) {
-			Rect b = new Rect();
-			p.getTextBounds(text, 0, text.length(), b);
-			int bwidth  = b.width()+2;
-			int bheight = b.height()+2;
-			Bitmap bm = Bitmap.createBitmap(bwidth, bheight, Bitmap.Config.ARGB_8888);
-			Canvas c = new Canvas(bm);
-			p.setColor(overlayBackgroundColor);
-			c.drawRect(0, 0, bwidth, bheight, p);
-			p.setColor(overlayTextColor);
-			c.drawText(text, -b.left+1, (bheight/2)-((p.ascent()+p.descent())/2)+1, p);
-			return bm;           
-		}
-
 		public void run() {
-			start = System.currentTimeMillis();
-			PorterDuffXfermode mode = new PorterDuffXfermode(PorterDuff.Mode.DST_OVER);
+			Log.d(TAG, "thread start");						
 			Bitmap bm;
-			int width;
-			int height;
 			Rect destRect;
 			Canvas c = null;
-			Paint p = new Paint();
-			String fps;
+			Paint p = new Paint();			
 			while (mRun) {
 				if(surfaceDone) {
 					try {
 						c = mSurfaceHolder.lockCanvas();
 						synchronized (mSurfaceHolder) {
+							
 							try {
 								bm = mIn.readMjpegFrame();
+								//bm = MyPanelView.mBitmap;
 								destRect = destRect(bm.getWidth(),bm.getHeight());
+								Log.d(TAG, "draw :" + destRect.width());
+								Log.d(TAG, "new frame : "+ destRect.height());
 								c.drawColor(Color.BLACK);
 								c.drawBitmap(bm, null, destRect, p);
-								if(showFps) {
-									p.setXfermode(mode);
-									if(ovl != null) {
-										height = ((ovlPos & 1) == 1) ? destRect.top : destRect.bottom-ovl.getHeight();
-										width  = ((ovlPos & 8) == 8) ? destRect.left : destRect.right -ovl.getWidth();
-										c.drawBitmap(ovl, width, height, null);
-									}
-									p.setXfermode(null);
-									frameCounter++;
-									if((System.currentTimeMillis() - start) >= 1000) {
-										fps = String.valueOf(frameCounter)+" fps";
-										frameCounter = 0; 
-										start = System.currentTimeMillis();
-										ovl = makeFpsOverlay(overlayPaint, fps);
-									}
-								}
-							} catch (IOException e) {
-								e.getStackTrace();
-								Log.d(TAG, "catch IOException hit in run", e);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
+
 						}
 					} finally { 
 						if (c != null) {
@@ -534,7 +486,7 @@ class MyPanelView extends SurfaceView implements SurfaceHolder.Callback {
 }
 
 
-
+/*
 class ViewThread extends Thread {
 	private MyPanelView mPanel;
 	private SurfaceHolder mHolder;
@@ -565,8 +517,10 @@ class ViewThread extends Thread {
 		}
 	}
 }
+ */
 
-class MyGLSurfaceView extends GLSurfaceView implements SurfaceHolder.Callback {
+
+/*class MyGLSurfaceView extends GLSurfaceView implements SurfaceHolder.Callback {
 	MyRenderer mRenderer;
 
 	public MyGLSurfaceView(Context context) {		
@@ -646,4 +600,4 @@ class MyRenderer implements GLSurfaceView.Renderer {
 	private float mGreen;
 	private float mBlue;
 
-}
+}*/
