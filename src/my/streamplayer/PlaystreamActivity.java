@@ -72,7 +72,7 @@ public class PlaystreamActivity extends Activity {
 		//		super.onCreate(null);
 
 		setContentView(R.layout.main);         		
-		Display display = getWindowManager().getDefaultDisplay();        
+		Display display = getWindowManager().getDefaultDisplay();
 
 		Log.v("Playstream", "height = "+ display.getHeight());
 		Log.v("Playstream", "width = "+ display.getWidth());     
