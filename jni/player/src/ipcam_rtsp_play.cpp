@@ -386,9 +386,7 @@ void prepend(unsigned char* s, unsigned char const* t, int len)
 {
 	//size_t len = strlen(t);
 	size_t i;
-
 	memmove(s + len, s, len + 1);
-
 	for (i = 0; i < len; ++i)
 	{
 		s[i] = t[i];
@@ -397,23 +395,17 @@ void prepend(unsigned char* s, unsigned char const* t, int len)
 
 void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedBytes,
 		struct timeval presentationTime, unsigned /*durationInMicroseconds*/) {
-	// We've just received a frame of data.  (Optionally) print out information about it:
-	//	if (fStreamId != NULL) LOGI( "Stream :%s \n",fStreamId);
-
 	if (strcmp(fSubsession.mediumName(), "video") == 0)
 	{
-		//call video decoder function from here : somehow :P //it's done
-		LOGI("%s  /  %s : :\tReceived %d bytes ", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
+		//LOGI("%s  /  %s : :\tReceived %d bytes ", fSubsession.mediumName(), fSubsession.codecName(), frameSize);
 		if (camidx==1)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(1);
 			if (strcmp(fSubsession.codecName(), "H264") == 0)
 			{
 				unsigned char const start_code[4] = {0x00, 0x00, 0x00, 0x01};
-
 				// If we have PPS/SPS NAL units encoded in a "sprop parameter string", prepend these to the file:
-/*
-				unsigned numSPropRecords;
+				/*unsigned numSPropRecords;
 				SPropRecord* sPropRecords = parseSPropParameterSets(fSubsession.fmtp_spropparametersets(), numSPropRecords);
 
 				for (unsigned i = 0; i < numSPropRecords; ++i) {
@@ -422,8 +414,7 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 					LOGI("Rec %u rec size = %d",i, sPropRecords[i].sPropLength);
 					prepend(fReceiveBuffer, sPropRecords[i].sPropBytes, sPropRecords[i].sPropLength);
 				}
-				delete[] sPropRecords;
-*/
+				delete[] sPropRecords;*/
 
 				// Write the input data to the file, with the start code in front:
 				unsigned char * newFrame;
@@ -431,41 +422,55 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 				newFrame = (unsigned char *)malloc(frameSize+len);
 				int offset=0;
 				// add the start code
-
 				memcpy((newFrame + offset), start_code, len);
 				offset += len;
 
 				// add the buffer data
 				memcpy((newFrame + offset), fReceiveBuffer, frameSize);
 
-				videc->DecVideoH264 ((unsigned char*) newFrame, (unsigned int) (frameSize+offset));
+				//videc->DecVideoH264 ((unsigned char*) newFrame, (unsigned int) (frameSize+offset));
+			}
+			else if (strcmp(fSubsession.codecName(), "MP4V-ES") == 0) {
+				videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
 			}
 			else
-				videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+				LOGI("we don't support this format \n");
 		}
 		else if (camidx==2)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(2);
-			if (strcmp(fSubsession.codecName(), "H264") == 0)
-				videc->DecVideoH264 ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-			else
+			if (strcmp(fSubsession.codecName(), "H264") == 0) {
+				//videc->DecVideoH264 ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+			}
+			else if (strcmp(fSubsession.codecName(), "MP4V-ES") == 0) {
 				videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+			}
+			else
+				LOGI("we don't support this format \n");
 		}
 		else if (camidx==3)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(3);
-			if (strcmp(fSubsession.codecName(), "H264") == 0)
-				videc->DecVideoH264 ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-			else
+			if (strcmp(fSubsession.codecName(), "H264") == 0) {
+				//videc->DecVideoH264 ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+			}
+			else if (strcmp(fSubsession.codecName(), "MP4V-ES") == 0) {
 				videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+			}
+			else
+				LOGI("we don't support this format \n");
 		}
 		else if (camidx==4)
 		{
 			ipcam_vdec* videc = ipcam_vdec::getInstance(4);
-			if (strcmp(fSubsession.codecName(), "H264") == 0)
-				videc->DecVideoH264 ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
-			else
+			if (strcmp(fSubsession.codecName(), "H264") == 0) {
+				//videc->DecVideoH264 ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+			}
+			else if (strcmp(fSubsession.codecName(), "MP4V-ES") == 0) {
 				videc->DecVideo ((unsigned char*) fReceiveBuffer, (unsigned int) frameSize);
+			}
+			else
+				LOGI("we don't support this format \n");
 		}
 	}
 	if (numTruncatedBytes > 0) envir() << " (with " << numTruncatedBytes << " bytes truncated)";
@@ -481,7 +486,6 @@ void DecoderSink::afterGettingFrame(unsigned frameSize, unsigned numTruncatedByt
 
 Boolean DecoderSink::continuePlaying() {
 	if (fSource == NULL) return False; // sanity check (should not happen)
-
 	// Request the next frame of data from our input source.  "afterGettingFrame()" will get called later, when it arrives:
 	fSource->getNextFrame(fReceiveBuffer, DECODER_SINK_RECEIVE_BUFFER_SIZE,
 			afterGettingFrame, this,

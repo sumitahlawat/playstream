@@ -28,12 +28,13 @@ public class Rtsplayer {
 						//Log.d("Playstream","CB_string   env: " + String.valueOf(msg.arg1)+"  string: " +mystr);
 						if (mystr.contains("disp1"))
 							mainActivity.showbitmap1();				
-						else if (mystr.contains("disp2"))
+						/*						else if (mystr.contains("disp2"))
 							mainActivity.showbitmap2();
 						else if (mystr.contains("disp3"))
 							mainActivity.showbitmap3();
 						else if (mystr.contains("disp4"))
 							mainActivity.showbitmap4();
+						 */	
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -49,17 +50,11 @@ public class Rtsplayer {
 		Log.d("Playstream","constructor ... end ............. ");
 	}
 
-
 	@SuppressWarnings("unused")
 	private static void rcmcallback_string(String strx){
 		Message m = h.obtainMessage(RCM_CB_string, 0, 0, strx);
 		h.sendMessage(m);
 	}
-
-	//realted to rendering
-
-	//	public static native void native_gl_resize(int w, int h);
-	//	private static native void native_gl_render();
 	private native void init(Object weak_this);
 	public native void CreateRec(String url ,String recfile, int a, int b, int c, int d, Bitmap bitmap);
 	public native void StartRec(int a);
